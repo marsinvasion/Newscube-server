@@ -1,0 +1,13 @@
+{
+  "name": "news",
+  "description": "News Trends Application",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "express": "3.x",
+    "feedsub": "0.x",
+    "node-cron-jobs": "~1.0.1",
+    "redis": "~0.8.2",
+    "hiredis": "~0.1.15"
+  }
+}
