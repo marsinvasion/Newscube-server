@@ -1,17 +1,28 @@
 var nodejobs = require('node-cron-jobs');
 var jobs = nodejobs.jobs;
-var cronFunc = function(jobName){
-  console.log(jobName);
+var cronFunc = function(jobName, config){
+  console.log("Starting", jobName);
   var func = function(){
-        console.log("print this every time job "+jobName+" runs");
+	var FeedSub = require('feedsub');
+
+	reader = new FeedSub(config.url, {
+	  interval: config.interval,
+	  emitOnStart: true
+	});
+
+	reader.on('item', function(item) {
+	  console.log('Got item!');
+	  console.dir(item);
+	});
+
+	reader.start();
+
+        console.log("print this every time job runs", jobName, config);
   }
   jobs[jobName].addCallback(func);
   jobs[jobName].start();
 };
 for(var i in jobs){
-  cronFunc(i);
+  cronFunc(i, jobs[i].config);
 }
 
-console.log(nodejobs.config.dburl);
-console.log(jobs.firstjob.config.url);
-console.log(jobs.firstjob.config.time);

@@ -1,8 +1,8 @@
 {
   "jobs":[
-    {"handle":"firstjob","cron":"* * * * * *","timezone":"America/Chicago", "config": {"url":"http://rssfeeds.usatoday.com/usatoday-NewsTopStories"}
+    {"handle":"firstjob","cron":"","timezone":"America/Chicago", "config": {"url":"http://rssfeeds.usatoday.com/usatoday-NewsTopStories", "interval":"5"}
     },
-    {"handle":"secondjob","cron":"* * * * * *","timezone":"America/Los_Angeles","start":"false","config":{"url":"http://rss.cnn.com/rss/edition.rss"}
+    {"handle":"secondjob","cron":"","timezone":"America/Los_Angeles","start":"false","config":{"url":"http://rss.cnn.com/rss/edition.rss", "interval":"5"}
     }
   ],
   "config":{
