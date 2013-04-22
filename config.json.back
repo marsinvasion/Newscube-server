@@ -1,6 +1,8 @@
 {
   "jobs":[
     {"jobName":"usa today", "url":"http://rssfeeds.usatoday.com/usatoday-NewsTopStories", "interval":"5"}
+    ,
+    {"jobName":"cnn","url":"http://rss.cnn.com/rss/edition.rss", "interval":"5"}
     
   ]
 }
