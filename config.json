@@ -1,6 +1,8 @@
 {
   "jobs":[
-    {"jobName":"usa today", "url":"http://rssfeeds.usatoday.com/usatoday-NewsTopStories", "interval":"5"}
-    
+    {"handle":"usatoday","cron":"* * * * * *","timezone":"America/Chicago","start":"false","config":{"url":"http://rssfeeds.usatoday.com/usatoday-NewsTopStories"}
+    },
+    {"handle":"cnn","cron":"* * * * * *","timezone":"America/Los_Angeles","start":"false","config":{"url":"http://rss.cnn.com/rss/edition.rss"}
+    }
   ]
 }
