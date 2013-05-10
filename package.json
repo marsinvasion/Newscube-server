@@ -9,6 +9,7 @@
     "redis": "~0.8.2",
     "hiredis": "~0.1.15",
     "rssparser": "0.0.3",
-    "node-cron-jobs": "~1.0.3"
+    "node-cron-jobs": "~1.0.3",
+    "lazy": "~1.0.11"
   }
 }

@@ -4,5 +4,8 @@
     },
     {"handle":"cnn","cron":"0 * * * * *","timezone":"America/Los_Angeles","start":"false","config":{"url":"http://rss.cnn.com/rss/edition.rss","country":"US"}
     }
-  ]
+  ],
+  "config":{
+        "dictionary_file":"words"
+  }
 }
