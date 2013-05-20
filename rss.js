@@ -10,15 +10,6 @@ client.on("error", function (err) {
 });
 var DICTIONARY_KEY = "dictionary"
 
-var Lazy = require("lazy");
-var fs = require("fs");
-Lazy(fs.createReadStream(config.dictionary_file))
-	.lines
-	.forEach(function(line){
-	  client.sadd(DICTIONARY_KEY, line.toString().toLowerCase());  // sadd dictionary abracadabra
-	})
-;
-
 var cronFunc = function(jobName, config){
   var job = jobs[jobName]; 
   var parser = require('rssparser');
@@ -53,7 +44,7 @@ var cronFunc = function(jobName, config){
 			for(var match in matched){
 			  if(matched[match]){
 			  var matchKey = matched[match].toLowerCase();
-			  client.sismember(DICTIONARY_KEY, matchKey, function (reply){
+			  client.sismember(DICTIONARY_KEY, matchKey, function (error, reply){
 			  debugger;
 			    if(reply == 1){ // matches a dictionary word
 				var tagKey = todayKey+":tag";
