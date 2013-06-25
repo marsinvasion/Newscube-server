@@ -5,14 +5,13 @@ var stripHtml = function(htmlString){
 var parseFeed = function(client, out, config, dictionaryKey){
         for(var j in out.items){
             (function (j) {
-	     debugger;
              var item = out.items[j];
-             var todayKey = getTodayKey(config.country);
-	     client.sadd("country:date", todayKey); // sadd country:date US:05/01/2013
+             var todayKey = getTodayKey(config.country, config.category);
+	     client.sadd("country:date", todayKey); // sadd country:category:date US:news:05/01/2013
              var urlKey = todayKey+":url";
-             client.sadd(urlKey, item.url, function (error, reply){ // sadd US:05/01/2013:url cnn.com/rss/sweet.html
-                         if(reply == 1){ //url did not exist in db, save feed
-                         var published = new Date(item.published_at);
+             client.sadd(urlKey, item.url, function (error, reply){ // sadd US:news:05/01/2013:url cnn.com/rss/sweet.html
+                        if(reply == 1){ //url did not exist in db, save feed details
+                        var published = new Date(item.published_at);
                         var summary = stripHtml(item.summary.toString()); 
 			client.HMSET(item.url,{
                                       "title":stripHtml(item.title),
@@ -20,19 +19,19 @@ var parseFeed = function(client, out, config, dictionaryKey){
                                       "published_at":published,
                                       "inserted_at":new Date()
                                       } ); // hmset cnn.com/rss/sweet.html title "my title" summary "sweet summary" published_at today inserted_at today
-                         console.log("Saved", urlKey, item.url);
-                         var regex = /[a-zA-Z]+/g
-                         var matched = summary.toString().match(regex);
-                         if(matched){
+                        console.log("Saved", urlKey, item.url);
+                        var regex = /[a-zA-Z]+/g
+                        var matched = summary.toString().match(regex);
+                        if(matched){
                          for(var match in matched){
                          	saveMatch(matched[match], client, dictionaryKey, item, todayKey);
 			 } //end for loop matched
-                         } //matched
-                         else {
+                        } //matched
+                        else {
                          console.log("No matches found for", item.summary);
-                         } // end else
-                         } // reply == 1
-                         });
+                        } // end else
+                        } // reply == 1
+                        });
              }) (j);
         }
 }; 
@@ -41,37 +40,55 @@ var saveMatch = function(word, client, dictionaryKey, item, todayKey){
     if(word){
       var matchKey = word.toLowerCase();
       client.sismember(dictionaryKey, matchKey, function (error, reply){
-        debugger;
         if(reply == 1){ // matches a dictionary word
-		var tagKey = todayKey+":tag";
-		client.sadd(tagKey, matchKey); // sadd US:05/01/2013:tag sweet
-		client.sadd(tagKey+":"+matchKey, item.url); // sadd US:05/01/2013:tag:sweet cnn.com/rss/sweet.html
-		console.log("matched tag", matchKey);
-        }// reply ==1
+          saveAndIncrementTagCount(todayKey, matchKey, client, item.url);
+	}// reply ==1
         else if(reply == 0 && word.length>1){
 		//does not match a dictionary word
 		var first = word.charAt(0);
 		if(first == first.toUpperCase() && first != first.toLowerCase()){
-		    client.sadd(tagKey, matchKey); // sadd US:05/01/2013:tag sweet
-		    client.sadd(tagKey+":"+matchKey, item.url); // sadd US:05/01/2013:tag:sweet cnn.com/rss/sweet.html
-		    console.log("Saving upper case word as tag", matchKey);
+		  saveAndIncrementTagCount(todayKey, matchKey, client, item.url);
 		}//end uppercase word check
+		else {
+		  console.log("rejected word", matchKey);
+		}
         } // reply == 0
       }); // is sismember of dictionary
     } //end if(matchKey)
 };
 
-var getTodayKey = function(country){
+var saveAndIncrementTagCount = function(todayKey, matchWord, client, url){
+	var tagKey = getTagKey(todayKey);
+        client.sadd(tagKey, matchWord, function(error, reply){
+          var tagCount = tagKey+":"+matchWord+":count";
+          debugger;
+          if(reply == 1) { //tag did not exist
+          	client.set(tagCount, 1);
+          }else { //tag exists, increment
+                client.incr(tagCount);
+          }
+
+        }); // sadd US:news:05/01/2013:tag sweet
+        client.sadd(tagKey+":"+matchWord, url); // sadd US:news:05/01/2013:tag:sweet cnn.com/rss/sweet.html
+        console.log("saving tag", matchWord);
+};
+
+var getTodayKey = function(country, category){
              var today = new Date();
              var dd = today.getDate();
              var mm = today.getMonth()+1; //January is 0!
              var yyyy = today.getFullYear();
              if(dd<10){dd='0'+dd} if(mm<10){mm='0'+mm} today = mm+'/'+dd+'/'+yyyy;
-             return country+":"+today;
+             return country+":"+category+":"+today;
+};
+
+var getTagKey = function(todayKey){
+	return todayKey + ":tag";
 };
 
 module.exports = {
 	parseFeed : parseFeed,
 	stripHtml : stripHtml,
-	getTodayKey : getTodayKey
+	getTodayKey : getTodayKey,
+	getTagKey : getTagKey
 };

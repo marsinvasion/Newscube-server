@@ -4,7 +4,7 @@ var DICTIONARY_KEY = "TEST_DICTIONARY";
 describe('Rss Parser', function(){
   var json, redis, client;
 	before(function(){
-	  json = {"url":"http://testurl.com/rss/edition.rss","country":"US"};
+	  json = {"url":"http://testurl.com/rss/edition.rss","country":"US", "category":"news"};
 	  redis = require("redis");
 	  client = redis.createClient();
 	  client.on("error", function (err) {
@@ -24,10 +24,6 @@ describe('Rss Parser', function(){
 	  it('should parse and save 18 tags', function(){
 		var rssFeed = require('./rss');
 		rss.parseFeed(client, rssFeed,json,DICTIONARY_KEY);
-		var tagKey = rss.getTodayKey(json.country)+":tag";
-		client.smembers(tagKey, function(error, replies){
-			console.log("received reply", replies);
-		});
 	  });
 	});
 

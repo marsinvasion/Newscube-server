@@ -1,11 +1,8 @@
 {
   "jobs":[
-    {"handle":"usatoday","cron":"0 * * * * *","timezone":"America/Chicago","start":"false","config":{"url":"http://rssfeeds.usatoday.com/usatoday-NewsTopStories","country":"US"}
+    {"handle":"usatoday","cron":"0 * * * * *","timezone":"America/Chicago","start":"false","config":{"url":"http://rssfeeds.usatoday.com/usatoday-NewsTopStories","country":"US", "category":"news"}
     },
-    {"handle":"cnn","cron":"0 * * * * *","timezone":"America/Los_Angeles","start":"false","config":{"url":"http://rss.cnn.com/rss/edition.rss","country":"US"}
+    {"handle":"cnn","cron":"0 * * * * *","timezone":"America/Los_Angeles","start":"false","config":{"url":"http://rss.cnn.com/rss/edition.rss","country":"US", "category":"news"}
     }
-  ],
-  "config":{
-        "dictionary_file":"words"
-  }
+  ]
 }

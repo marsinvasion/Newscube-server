@@ -1,6 +1,5 @@
 var nodejobs = require('node-cron-jobs');
 var jobs = nodejobs.jobs;
-var config = nodejobs.config;
 var date = new Date();
 var redis = require("redis"),
         client = redis.createClient();
@@ -10,26 +9,25 @@ client.on("error", function (err) {
 });
 var DICTIONARY_KEY = "dictionary"
 var parser = require('rssparser');
+var parserUtil = require('./parserUtil');
 
-var cronFunc = function(jobName, config){
-  var job = jobs[jobName]; 
-  console.log("Starting", jobName, date);
+var cronFunc = function(jobId){
+  var job = jobs[jobId]; 
+  var config = job.config;
+  console.log("Starting", job.handle, date);
   var parse = function (){
-	console.log("kicking off job", jobName);
-	parser.parseURL(config.url, {}, parseItem);
+	parser.parseURL(config.url, {}, function(err, out){
+    	  if(err){
+        	  console.log(err);
+    	  }else{
+        	  parserUtil.parseFeed(client, out, config, DICTIONARY_KEY);
+    	  }
+	});
   }
   job.addCallback(parse);
   job.start();
 };
 for(var i in jobs){
-  cronFunc(i, jobs[i].config);
-}
-var parseItem = function(err, out){
-    if(err){
-        console.log(err);
-    }else{
-        var parserUtil = require('./parserUtil')
-        parserUtil.parseFeed(client, out, config, DICTIONARY_KEY);
-    }
-}
+  cronFunc(i);
+};
 
