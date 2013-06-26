@@ -27,10 +27,12 @@ app.get('/:country/:category', function(req, res) {
 var getResponse = function(tag, tagKey, json, callback){
 	client.get(tagKey+":"+tag+":count", function(err, reply){
 	  if(err) return callback(err);
-	  var obj = {};
-          obj.tag = tag;
-          obj.count = reply;
-	  json.push(obj);
+	  if(reply>1){
+	    var obj = {};
+            obj.tag = tag;
+            obj.count = reply;
+	    json.push(obj);
+	  }
 	  callback();
 	});
 }
