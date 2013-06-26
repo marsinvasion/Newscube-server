@@ -25,6 +25,30 @@ app.get('/:country/:category', function(req, res) {
   });
 });
 
+app.get('/:country/:category/:tag', function(req, res) {
+  var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
+  var tagKey = parserUtil.getTagKey(todayKey);
+  var tagUrls = tagKey+":"+req.params.tag;
+  client.smembers(tagUrls, function(err, urls){
+    var json = [];
+    async.each(urls, function(url, callback){
+	client.hgetall(url, function(err, reply){
+	  if(err) return callback(err);
+	  var obj = {};
+	  obj.title = reply.title;
+	  obj.summary = reply.summary;
+	  obj.url = url;
+	  json.push(obj);
+	  callback();
+	})
+    }, function(err){
+	debugger;
+	if(err) throw err;
+	res.json(json);
+    });
+  });
+});
+
 var sort = function(a, b){
 	return b.count - a.count;
 };
