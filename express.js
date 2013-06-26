@@ -19,10 +19,15 @@ app.get('/:country/:category', function(req, res) {
 	}, function(err){
 	  debugger;
 	  if(err) throw err;
+	  json.sort(sort);
 	  res.json(json);
   	});
   });
 });
+
+var sort = function(a, b){
+	return b.count - a.count;
+};
 
 var getResponse = function(tag, tagKey, json, callback){
 	client.get(tagKey+":"+tag+":count", function(err, reply){
@@ -35,7 +40,7 @@ var getResponse = function(tag, tagKey, json, callback){
 	  }
 	  callback();
 	});
-}
+};
 
 app.listen(process.env.PORT || 3000);
 console.log('Listening on port 3000');
