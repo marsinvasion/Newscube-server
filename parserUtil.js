@@ -41,12 +41,14 @@ var saveMatch = function(word, client, dictionaryKey, item, todayKey){
       var matchKey = word.toLowerCase();
       client.sismember(dictionaryKey, matchKey, function (error, reply){
         if(reply == 1){ // matches a dictionary word
+          console.log("saving dictionary tag", matchWord);
           saveAndIncrementTagCount(todayKey, matchKey, client, item.url);
 	}// reply ==1
         else if(reply == 0 && word.length>1){
 		//does not match a dictionary word
 		var first = word.charAt(0);
 		if(first == first.toUpperCase() && first != first.toLowerCase()){
+        	  console.log("saving upper case tag", matchWord);
 		  saveAndIncrementTagCount(todayKey, matchKey, client, item.url);
 		}//end uppercase word check
 		else {
@@ -70,7 +72,6 @@ var saveAndIncrementTagCount = function(todayKey, matchWord, client, url){
 
         }); // sadd US:news:05/01/2013:tag sweet
         client.sadd(tagKey+":"+matchWord, url); // sadd US:news:05/01/2013:tag:sweet cnn.com/rss/sweet.html
-        console.log("saving tag", matchWord);
 };
 
 var getTodayKey = function(country, category){
