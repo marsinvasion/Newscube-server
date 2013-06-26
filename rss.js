@@ -11,9 +11,10 @@ var DICTIONARY_KEY = "dictionary"
 var parser = require('rssparser');
 var parserUtil = require('./parserUtil');
 
-var cronFunc = function(job){
+var cronFunc = function(handle){
+  var job = jobs[handle];
   var config = job.config;
-  console.log("Starting", job.handle, date);
+  console.log("Starting", handle, date);
   var parse = function (){
 	parser.parseURL(config.url, {}, function(err, out){
     	  if(err){
@@ -27,6 +28,6 @@ var cronFunc = function(job){
   job.start();
 };
 for(var i in jobs){
-  cronFunc(jobs[i]);
+  cronFunc(i);
 };
 

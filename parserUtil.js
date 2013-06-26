@@ -41,18 +41,18 @@ var saveMatch = function(word, client, dictionaryKey, item, todayKey){
       var matchKey = word.toLowerCase();
       client.sismember(dictionaryKey, matchKey, function (error, reply){
         if(reply == 1){ // matches a dictionary word
-          console.log("saving dictionary tag", matchWord);
+          console.log("saving dictionary tag", word);
           saveAndIncrementTagCount(todayKey, matchKey, client, item.url);
 	}// reply ==1
         else if(reply == 0 && word.length>1){
 		//does not match a dictionary word
 		var first = word.charAt(0);
 		if(first == first.toUpperCase() && first != first.toLowerCase()){
-        	  console.log("saving upper case tag", matchWord);
+        	  console.log("saving upper case tag", word);
 		  saveAndIncrementTagCount(todayKey, matchKey, client, item.url);
 		}//end uppercase word check
 		else {
-		  console.log("rejected word", matchKey);
+		  console.log("rejected word", word);
 		}
         } // reply == 0
       }); // is sismember of dictionary
