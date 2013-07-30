@@ -7,7 +7,9 @@ client.on("error", function (err) {
 });
 var parserUtil = require('./parserUtil');
 var async = require('async');
-app.get('/:country/:category', function(req, res) {
+
+//- http://localhost:3000/US/news/tag
+app.get('/:country/:category/tag', function(req, res) {
   var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
   var tagKey = parserUtil.getTagKey(todayKey);
 
@@ -25,29 +27,53 @@ app.get('/:country/:category', function(req, res) {
   });
 });
 
-app.get('/:country/:category/:tag', function(req, res) {
+//- http://localhost:3000/US/news/website/cnn.com
+app.get('/:country/:category/website/:website', function(req, res) {
+  var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
+  client.smembers(todayKey+":"+req.params.website, function(err, urls){
+    response(urls,res);
+  });
+});
+
+//- http://localhost:3000/US/news/tag/Snowden
+app.get('/:country/:category/tag/:tag', function(req, res) {
   var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
   var tagKey = parserUtil.getTagKey(todayKey);
   var tagUrls = tagKey+":"+req.params.tag;
   client.smembers(tagUrls, function(err, urls){
-    var json = [];
-    async.each(urls, function(url, callback){
-	client.hgetall(url, function(err, reply){
-	  if(err) return callback(err);
-	  var obj = {};
-	  obj.title = reply.title;
-	  obj.summary = reply.summary;
-	  obj.url = url;
-	  json.push(obj);
-	  callback();
-	})
-    }, function(err){
-	debugger;
-	if(err) throw err;
-	res.json(json);
-    });
+    response(urls,res);
   });
 });
+
+//- http://localhost:3000/US/news/random
+app.get('/:country/:category/random', function(req, res) {
+  var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
+  client.SRANDMEMBER(todayKey+":url", function(err, url){
+    var urls = [url];
+    response(urls,res);
+  });
+});
+
+var response = function(urls, res){
+    var json = [];
+    async.each(urls, function(url, callback){
+        client.hgetall(url, function(err, reply){
+          if(err) return callback(err);
+          var obj = {};
+          obj.title = reply.title;
+          obj.summary = reply.summary;
+          obj.url = url;
+          obj.website = reply.website;
+	  obj.published = reply.published_at;
+	  json.push(obj);
+          callback();
+        })
+    }, function(err){
+        debugger;
+        if(err) throw err;
+        res.json(json);
+    });
+};
 
 var sort = function(a, b){
 	return b.count - a.count;
@@ -66,5 +92,6 @@ var getResponse = function(tag, tagKey, json, callback){
 	});
 };
 
-app.listen(process.env.PORT || 3000);
-console.log('Listening on port 3000');
+var port = process.env.PORT || 3000;
+app.listen(port);
+console.log('Listening on port', port);

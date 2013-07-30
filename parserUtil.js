@@ -17,9 +17,12 @@ var parseFeed = function(client, out, config, dictionaryKey){
                                       "title":stripHtml(item.title),
                                       "summary":summary,
                                       "published_at":published,
-                                      "inserted_at":new Date()
+				      "website":config.website,
+                                      "inserted_at":new Date(),
+				      
                                       } ); // hmset cnn.com/rss/sweet.html title "my title" summary "sweet summary" published_at today inserted_at today
                         console.log("Saved", urlKey, item.url);
+			client.sadd(todayKey+":"+config.website, item.url);
                         var regex = /[a-zA-Z]+/g
                         var matched = summary.toString().match(regex);
                         if(matched){
@@ -81,6 +84,7 @@ var getTodayKey = function(country, category){
              var yyyy = today.getFullYear();
              if(dd<10){dd='0'+dd} if(mm<10){mm='0'+mm} today = mm+'/'+dd+'/'+yyyy;
              return country+":"+category+":"+today;
+    //         return country+":"+category+":"+"06/26/2013";
 };
 
 var getTagKey = function(todayKey){
