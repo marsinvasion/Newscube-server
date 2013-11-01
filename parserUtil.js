@@ -14,7 +14,7 @@ var parseFeed = function(client, out, config, dictionaryKey){
              client.sadd(urlKey, item.url, function (error, reply){ // sadd US:news:05/01/2013:url cnn.com/rss/sweet.html
                         if(reply == 1){ //url did not exist in db, save feed details
                         var published = new Date(item.published_at);
-                        var summary = null;
+                        var summary = '';
 			if(item.description){
 				summary = stripHtml(item.description.toString()); 
 			} else {
