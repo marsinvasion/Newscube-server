@@ -1,10 +1,12 @@
 var stripHtml = function(htmlString){
-  return htmlString.replace(/<(?:.|\n)*?>/gm, '').trim();
+  htmlString = htmlString.replace(/<(?:.|\n)*?>/gm, '').trim();
+  return htmlString.replace(/&[\w]*;/gm, '');
 };
 
 var parseFeed = function(client, out, config, dictionaryKey){
         for(var j in out.items){
             (function (j) {
+	    try{
              var item = out.items[j];
              var todayKey = getTodayKey(config.country, config.category);
 	     client.sadd("country:date", todayKey); // sadd country:category:date US:news:05/01/2013
@@ -40,6 +42,9 @@ var parseFeed = function(client, out, config, dictionaryKey){
                         } // end else
                         } // reply == 1
                         });
+		}catch(err){
+		 console.log(err);
+		}
              }) (j);
         }
 }; 
