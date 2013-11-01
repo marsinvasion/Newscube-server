@@ -58,7 +58,8 @@ var response = function(urls, res){
     async.each(urls, function(url, callback){
         client.hgetall(url, function(err, reply){
           if(err) return callback(err);
-          var obj = {};
+          if(reply){
+	  var obj = {};
           obj.title = reply.title;
           obj.summary = reply.summary;
           obj.url = url;
@@ -66,6 +67,9 @@ var response = function(urls, res){
 	  obj.published = reply.published_at;
 	  json.push(obj);
           callback();
+	  }else{
+            console.log("null item", reply);
+	  }
         })
     }, function(err){
         debugger;
