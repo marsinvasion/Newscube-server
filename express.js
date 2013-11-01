@@ -48,8 +48,7 @@ app.get('/:country/:category/tag/:tag', function(req, res) {
 //- http://localhost:3000/US/news/random
 app.get('/:country/:category/random', function(req, res) {
   var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
-  client.SRANDMEMBER(todayKey+":url", function(err, url){
-    var urls = [url];
+  client.SRANDMEMBER(todayKey+":url", 10, function(err, urls){
     response(urls,res);
   });
 });

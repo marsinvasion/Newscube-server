@@ -1,8 +1,25 @@
 {
   "jobs":[
-    {"handle":"usatoday","cron":"0 * * * * *","timezone":"America/Chicago","start":"false","config":{"url":"http://rssfeeds.usatoday.com/usatoday-NewsTopStories","country":"US", "category":"news", "website":"usatoday.com"}
-    },
-    {"handle":"cnn","cron":"0 * * * * *","timezone":"America/Los_Angeles","start":"false","config":{"url":"http://rss.cnn.com/rss/edition.rss","country":"US", "category":"news", "website":"cnn.com"}
-    }
+
+    {"handle":"Asian Age","cron":"2 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://www.asianage.com/rss/38","country":"IN", "category":"news", "website":"http://asianage.com"}},
+    {"handle":"BBC India","cron":"3 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://feeds.bbci.co.uk/news/world/asia/india/rss.xml","country":"IN", "category":"news", "website":"http://bbc.co.uk"}},
+    {"handle":"Central Chronicle","cron":"4 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://www.centralchronicle.com/national-news/feed","country":"IN", "category":"news", "website":"http://centralchronicle.com"}},
+    {"handle":"CNN-IBN","cron":"5 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://ibnlive.in.com/xml/top.xml","country":"IN", "category":"news", "website":"http://ibnlive.in.com"}},
+    {"handle":"DNA","cron":"6 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://www.dnaindia.com/syndication/rss_topnews.xml","country":"IN", "category":"news", "website":"http://dnaindia.com"}},
+    {"handle":"Deccan Herald","cron":"7 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://www.deccanherald.com/rss/news.rss","country":"IN", "category":"news", "website":"http://deccanherald.com"}},
+    {"handle":"Hindustan Times","cron":"8 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://feeds.hindustantimes.com/HT-HomePage-TopStories","country":"IN", "category":"news", "website":"http://hindustantimes.com"}},
+    {"handle":"Hindu","cron":"9 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://www.thehindu.com/news/national/?service=rss","country":"IN", "category":"news", "website":"http://hindu.com"}},
+    {"handle":"India Today","cron":"10 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://indiatoday.feedsportal.com/c/33614/f/589702/index.rss?http://indiatoday.intoday.in/rss/article.jsp?sid=36","country":"IN", "category":"news", "website":"http://indiatoday.intoday.in"}},
+    {"handle":"Indian Express","cron":"11 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://syndication.indianexpress.com/rss/721/india.xml","country":"IN", "category":"news", "website":"http://indianexpress.com"}},
+    {"handle":"Mid-day","cron":"12 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://feeds.mid-day.com/mdnews/national","country":"IN", "category":"news", "website":"http://mid-day.com"}},
+    {"handle":"NDTV","cron":"13 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://feeds2.feedburner.com/ndtv/Lsgd","country":"IN", "category":"news", "website":"http://ndtv.com"}},
+    {"handle":"Outlook India","cron":"14 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://www.outlookindia.com/oirss.aspx?source=web&id=0","country":"IN", "category":"news", "website":"http://outlookindia.com"}},
+    {"handle":"PTI","cron":"15 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://newsrack.in/crawled.feeds/pti.rss.xml","country":"IN", "category":"news", "website":"http://ptinews.com"}},
+    {"handle":"Rediff","cron":"16 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://www.rediff.com/rss/inrss.xml","country":"IN", "category":"news", "website":"http://rediff.com"}},
+    {"handle":"Times of India","cron":"17 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://newsrack.in/crawled.feeds/toi.rss.xml","country":"IN", "category":"news", "website":"http://timesofindia.com"}},
+    {"handle":"Tehelka","cron":"29 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://www.tehelka.com/?feed=custom_feed","country":"IN", "category":"news", "website":"http://tehelka.com"}},
+    {"handle":"Telegraph","cron":"30 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://www.telegraphindia.com/feeds/rss.jsp?id=4","country":"IN", "category":"news", "website":"http://telegraphindia.com"}},
+    {"handle":"usatoday","cron":"0 * * * *","timezone":"America/Chicago","start":"false","config":{"url":"http://rssfeeds.usatoday.com/usatoday-NewsTopStories","country":"US", "category":"news", "website":"http://usatoday.com"}},
+    {"handle":"cnn","cron":"0 * * * *","timezone":"America/Los_Angeles","start":"false","config":{"url":"http://rss.cnn.com/rss/edition.rss","country":"US", "category":"news", "website":"http://cnn.com"}}
   ]
 }
