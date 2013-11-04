@@ -6,26 +6,28 @@ var stripHtml = function(htmlString){
 var parseFeed = function(client, out, config, dictionaryKey){
         for(var j in out.items){
             (function (j) {
-	    try{
-             var item = out.items[j];
-             var todayKey = getTodayKey(config.country, config.category);
-	     client.sadd("country:date", todayKey); // sadd country:category:date US:news:05/01/2013
-             var urlKey = todayKey+":url";
-             client.sadd(urlKey, item.url, function (error, reply){ // sadd US:news:05/01/2013:url cnn.com/rss/sweet.html
+	    	try{
+             	var item = out.items[j];
+	     	var title = item.title 
+                var summary = '';
+		if(item.description){
+			summary = stripHtml(item.description.toString()); 
+		} else {
+			summary = stripHtml(item.summary.toString());
+		}
+             	var todayKey = getTodayKey(config.country, config.category);
+                var published = new Date(item.published_at);
+	     	client.sadd("country:date", todayKey); // sadd country:category:date US:news:05/01/2013
+             	var urlKey = todayKey+":url";
+             	client.sadd(urlKey, item.url, function (error, reply){ // sadd US:news:05/01/2013:url cnn.com/rss/sweet.html
                         if(reply == 1){ //url did not exist in db, save feed details
-                        var published = new Date(item.published_at);
-                        var summary = '';
-			if(item.description){
-				summary = stripHtml(item.description.toString()); 
-			} else {
-				summary = stripHtml(item.summary.toString());
-			}
 			client.HMSET(item.url,{
-                                      "title":stripHtml(item.title),
+                                      "title":stripHtml(title),
                                       "summary":summary,
                                       "published_at":published,
 				      "website":config.website,
                                       "inserted_at":new Date(),
+				      "source":j
 				      
                                       } ); // hmset cnn.com/rss/sweet.html title "my title" summary "sweet summary" published_at today inserted_at today
                         console.log("Saved", urlKey, item.url);

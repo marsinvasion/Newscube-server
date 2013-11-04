@@ -65,6 +65,7 @@ var response = function(urls, res){
           obj.url = url;
           obj.website = reply.website;
 	  obj.published = reply.published_at;
+	  obj.source = reply.source;
 	  json.push(obj);
           callback();
 	  }else{
