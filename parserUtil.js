@@ -3,7 +3,7 @@ var stripHtml = function(htmlString){
   return htmlString.replace(/&[\w]*;/gm, '');
 };
 
-var parseFeed = function(client, out, config, dictionaryKey){
+var parseFeed = function(client, out, config, dictionaryKey, handle){
         for(var j in out.items){
             (function (j) {
 	    	try{
@@ -27,7 +27,7 @@ var parseFeed = function(client, out, config, dictionaryKey){
                                       "published_at":published,
 				      "website":config.website,
                                       "inserted_at":new Date(),
-				      "source":j
+				      "source":handle
 				      
                                       } ); // hmset cnn.com/rss/sweet.html title "my title" summary "sweet summary" published_at today inserted_at today
                         console.log("Saved", urlKey, item.url);

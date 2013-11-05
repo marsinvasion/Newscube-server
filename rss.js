@@ -20,7 +20,7 @@ var cronFunc = function(handle){
     	  if(err){
         	  console.log(err);
     	  }else{
-        	  parserUtil.parseFeed(client, out, config, DICTIONARY_KEY);
+        	  parserUtil.parseFeed(client, out, config, DICTIONARY_KEY,handle);
     	  }
 	});
   }
