@@ -1,6 +1,6 @@
 var stripHtml = function(htmlString){
   htmlString = htmlString.replace(/<(?:.|\n)*?>/gm, '').trim();
-  return htmlString.replace(/&[\w]*;/gm, '');
+  return htmlString.replace(/&[#a-zA-Z0-9]*;/gm, '');
 };
 
 var parseFeed = function(client, out, config, dictionaryKey, handle){
