@@ -16,8 +16,13 @@ var parseFeed = function(client, out, config, dictionaryKey, handle){
 			summary = stripHtml(item.summary.toString());
 		}
              	var todayKey = getTodayKey(config.country, config.category);
-                var published = new Date(item.published_at);
-	     	client.sadd("country:date", todayKey); // sadd country:category:date US:news:05/01/2013
+		var published = '';
+		if(item.published_at){
+			published = new Date(item.published_at);
+	     	} else {
+			published = new Date(); 
+		}
+		client.sadd("country:date", todayKey); // sadd country:category:date US:news:05/01/2013
              	var urlKey = todayKey+":url";
              	client.sadd(urlKey, item.url, function (error, reply){ // sadd US:news:05/01/2013:url cnn.com/rss/sweet.html
                         if(reply == 1){ //url did not exist in db, save feed details
