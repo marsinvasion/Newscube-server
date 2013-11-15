@@ -13,7 +13,6 @@
     {"handle":"Mid-day","cron":"22 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://feeds.mid-day.com/middaynews","country":"IN", "category":"news", "website":"http://mid-day.com"}},
     {"handle":"NDTV","cron":"24 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://feeds2.feedburner.com/ndtv/Lsgd","country":"IN", "category":"news", "website":"http://ndtv.com"}},
     {"handle":"Outlook India","cron":"26 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://www.outlookindia.com/oirss.aspx?source=web&id=0","country":"IN", "category":"news", "website":"http://outlookindia.com"}},
-    {"handle":"PTI","cron":"30 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://newsrack.in/crawled.feeds/pti.rss.xml","country":"IN", "category":"news", "website":"http://ptinews.com"}},
     {"handle":"Rediff","cron":"32 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://www.rediff.com/rss/inrss.xml","country":"IN", "category":"news", "website":"http://rediff.com"}},
     {"handle":"Times of India","cron":"34 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://timesofindia.feedsportal.com/c/33039/f/533916/index.rss","country":"IN", "category":"news", "website":"http://timesofindia.com"}},
     {"handle":"Tehelka","cron":"36 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://www.tehelka.com/?feed=custom_feed","country":"IN", "category":"news", "website":"http://tehelka.com"}},
