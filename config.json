@@ -19,8 +19,6 @@
     {"handle":"Telegraph","cron":"38 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://www.telegraphindia.com/feeds/rss.jsp?id=4","country":"IN", "category":"news", "website":"http://telegraphindia.com"}},
     {"handle":"Reuters India","cron":"40 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://feeds.reuters.com/reuters/INtopNews","country":"IN", "category":"news", "website":"http://reuters.com"}},
     {"handle":"One India","cron":"42 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://news.oneindia.in/rss/news-india-fb.xml","country":"IN", "category":"news", "website":"http://oneindia.in"}},
-    {"handle":"Zee news","cron":"44 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://zeenews.india.com/rss/nation.aspx","country":"IN", "category":"news", "website":"http://zeenews.india.com"}},
-    {"handle":"usatoday","cron":"46 * * * *","timezone":"America/Chicago","start":"false","config":{"url":"http://rssfeeds.usatoday.com/usatoday-NewsTopStories","country":"US", "category":"news", "website":"http://usatoday.com"}},
-    {"handle":"cnn","cron":"48 * * * *","timezone":"America/Los_Angeles","start":"false","config":{"url":"http://rss.cnn.com/rss/edition.rss","country":"US", "category":"news", "website":"http://cnn.com"}}
+    {"handle":"Zee news","cron":"44 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://zeenews.india.com/rss/nation.aspx","country":"IN", "category":"news", "website":"http://zeenews.india.com"}}
   ]
 }

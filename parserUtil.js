@@ -12,7 +12,7 @@ var parseFeed = function(client, out, config, dictionaryKey, handle){
                 var summary = '';
 		if(item.description){
 			summary = stripHtml(item.description.toString()); 
-		} else {
+		} else if(item.summary) {
 			summary = stripHtml(item.summary.toString());
 		}
              	var todayKey = getTodayKey(config.country, config.category);
@@ -36,7 +36,7 @@ var parseFeed = function(client, out, config, dictionaryKey, handle){
 				      
                                       } ); // hmset cnn.com/rss/sweet.html title "my title" summary "sweet summary" published_at today inserted_at today
                         console.log("Saved", urlKey, item.url);
-			client.sadd(todayKey+":"+config.website, item.url);
+			client.sadd(todayKey+":"+handle, item.url);
                         var regex = /[a-zA-Z]+/g
                         var matched = summary.toString().match(regex);
                         if(matched){
