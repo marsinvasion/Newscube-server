@@ -1,3 +1,4 @@
+var Monitor = require('monitor').start();
 var express = require('express');
 var app = express();
 var redis = require("redis"),
@@ -7,6 +8,13 @@ client.on("error", function (err) {
 });
 var parserUtil = require('./parserUtil');
 var async = require('async');
+
+app.get('/status', function(req, res) {
+
+  client.ping(function(err, reply){
+	res.json(reply);
+  });
+});
 
 //- http://localhost:3000/US/news/tag
 app.get('/:country/:category/tag', function(req, res) {
