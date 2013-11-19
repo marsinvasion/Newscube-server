@@ -1,4 +1,3 @@
-var Monitor = require('monitor').start();
 var express = require('express');
 var app = express();
 var redis = require("redis"),
