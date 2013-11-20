@@ -1,3 +1,5 @@
+var IGNORED_DICTIONARY_KEY = "ignored_dictionary";
+
 var stripHtml = function(htmlString){
   htmlString = htmlString.replace(/<(?:.|\n)*?>/gm, '').trim();
   return htmlString.replace(/&[#a-zA-Z0-9]*;/gm, '');
@@ -61,12 +63,14 @@ var parseFeed = function(client, out, config, dictionaryKey, handle){
 var saveMatch = function(word, client, dictionaryKey, item, todayKey){
     if(word){
       var matchKey = word.toLowerCase();
-      client.sismember(dictionaryKey, matchKey, function (error, reply){
-        if(reply == 1){ // matches a dictionary word
-          //console.log("saving dictionary tag", word);
-          saveAndIncrementTagCount(todayKey, matchKey, client, item.url);
-	}// reply ==1
-        else if(reply == 0 && word.length>1){
+      client.sismember(IGNORED_DICTIONARY_KEY, matchKey, function (error, reply){
+	if(reply == 0){ // does not match ignored dictionary	
+	  client.sismember(dictionaryKey, matchKey, function (error, reply){
+            if(reply == 1){ // matches a dictionary word
+              //console.log("saving dictionary tag", word);
+              saveAndIncrementTagCount(todayKey, matchKey, client, item.url);
+	    }// reply ==1
+            else if(reply == 0 && word.length>1){
 		//does not match a dictionary word
 		var first = word.charAt(0);
 		if(first == first.toUpperCase() && first != first.toLowerCase()){
@@ -76,6 +80,8 @@ var saveMatch = function(word, client, dictionaryKey, item, todayKey){
 		else {
 		  //console.log("rejected word", word);
 		}
+	   }
+	  });
         } // reply == 0
       }); // is sismember of dictionary
     } //end if(matchKey)

@@ -7,7 +7,7 @@ client.on("error", function (err) {
 });
 var parserUtil = require('./parserUtil');
 var async = require('async');
-
+var minTagCount = 0;
 app.get('/status', function(req, res) {
 
   client.ping(function(err, reply){
@@ -28,7 +28,7 @@ app.get('/:country/:category/tag', function(req, res) {
 	}, function(err){
 	  debugger;
 	  if(err) throw err;
-	  json.sort(sort);
+//	  json.sort(sort);
 	  res.json(json);
   	});
   });
@@ -93,7 +93,7 @@ var sort = function(a, b){
 var getResponse = function(tag, tagKey, json, callback){
 	client.get(tagKey+":"+tag+":count", function(err, reply){
 	  if(err) return callback(err);
-	  if(reply>1){
+	  if(reply>minTagCount){
 	    var obj = {};
             obj.tag = tag;
             obj.count = reply;
