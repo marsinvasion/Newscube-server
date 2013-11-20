@@ -16,13 +16,17 @@ var cronFunc = function(handle){
   var config = job.config;
   console.log("Starting", handle, date);
   var parse = function (){
+	try{
 	parser.parseURL(config.url, {}, function(err, out){
     	  if(err){
-        	  console.log(err);
+        	  console.log("Error parsing url" + err);
     	  }else{
         	  parserUtil.parseFeed(client, out, config, DICTIONARY_KEY,handle);
     	  }
 	});
+	} catch (err) {
+		console.log(err);
+	}
   }
   job.addCallback(parse);
   job.start();
