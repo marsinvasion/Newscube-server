@@ -8,7 +8,8 @@ var parseFeed = function(client, out, config, dictionaryKey, handle){
             (function (j) {
 	    	try{
              	var item = out.items[j];
-	     	var title = item.title 
+	     	if(item.title){
+		var title = item.title 
                 var summary = '';
 		if(item.description){
 			summary = stripHtml(item.description.toString()); 
@@ -49,6 +50,7 @@ var parseFeed = function(client, out, config, dictionaryKey, handle){
                         } // end else
                         } // reply == 1
                         });
+		}// end if title
 		}catch(err){
 		 console.log(err);
 		}
