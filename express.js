@@ -21,7 +21,6 @@ app.get('/:country/:category/tag', function(req, res) {
   var tagKey = parserUtil.getTagKey(todayKey);
 
   client.smembers(tagKey, function(err, tags){
-	console.log(tags);
 	var json = [];
 	async.each(tags, function(tag, callback){
 	  getResponse(tag, tagKey, json, callback);
