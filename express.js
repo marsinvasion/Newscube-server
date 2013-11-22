@@ -7,7 +7,7 @@ client.on("error", function (err) {
 });
 var parserUtil = require('./parserUtil');
 var async = require('async');
-var minTagCount = 0;
+var minTagCount = 20;
 app.get('/status', function(req, res) {
 
   client.ping(function(err, reply){
