@@ -40,7 +40,6 @@ var parseFeed = function(client, out, config, dictionaryKey, handle){
 				      "source":handle
 				      
                                       } ); // hmset cnn.com/rss/sweet.html title "my title" summary "sweet summary" published_at today inserted_at today
-                        console.log("Saved", urlKey, item.url);
 			var args1 = [ todayKey+":"+handle, score, item.url ];
 			client.zadd(args1, function (error, reply){
 			  if(error)
@@ -95,17 +94,16 @@ var saveMatch = function(word, client, dictionaryKey, item, todayKey){
 
 var saveAndIncrementTagCount = function(todayKey, matchWord, client, url){
 	var tagKey = getTagKey(todayKey);
-        client.sadd(tagKey, matchWord, function(error, reply){
-          var tagCount = tagKey+":"+matchWord+":count";
-          debugger;
-          if(reply == 1) { //tag did not exist
-          	client.set(tagCount, 1);
-          }else { //tag exists, increment
-                client.incr(tagCount);
-          }
-
-        }); // sadd US:news:05/01/2013:tag sweet
-        client.sadd(tagKey+":"+matchWord, url); // sadd US:news:05/01/2013:tag:sweet cnn.com/rss/sweet.html
+        var args = [ tagKey, score, matchWord ];
+	client.zincrby(args, function(error, reply){
+	  if(error)
+		throw error;
+        }); //zincrby
+	var args1 = [ tagKey+":"+matchWord, score, url]; 
+        client.zadd(args1, function (err, reply){
+	  if(err)
+		throw err;
+	}); // zadd US:news:05/01/2013:tag:sweet cnn.com/rss/sweet.html
 };
 
 var getTodayKey = function(country, category){

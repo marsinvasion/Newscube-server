@@ -15,25 +15,27 @@ app.get('/status', function(req, res) {
   });
 });
 
-//- http://localhost:3000/US/news/tag
-app.get('/:country/:category/tag', function(req, res) {
+//- http://localhost:3000/US/news/tag/0/99
+app.get('/:country/:category/tag/:start/:end', function(req, res) {
   var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
   var tagKey = parserUtil.getTagKey(todayKey);
-
-  client.smembers(tagKey, function(err, tags){
-	var json = [];
-	async.each(tags, function(tag, callback){
-	  getResponse(tag, tagKey, json, callback);
-	}, function(err){
-	  debugger;
-	  if(err) throw err;
-//	  json.sort(sort);
-	  res.json(json);
-  	});
+  var args = [ tagKey, req.params.start, req.params.end, "withscores" ];
+  
+  client.zrevrange(args, function(err, tags){
+    if(err)
+	  throw err;
+    var json = [];
+    for(var i = 0; i < tags.length; i = i + 2){
+    	var obj = {};
+        obj.tag = tags[i];
+        obj.count = tags[i+1];
+        json.push(obj);
+    }
+    res.json(json);
   });
 });
 
-//- http://localhost:3000/US/news/website/CNN-IBN/11/20
+//- http://localhost:3000/US/news/website/CNN-IBN/10/19
 app.get('/:country/:category/website/:handle/:start/:end', function(req, res) {
   var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
   var args = [ todayKey+":"+req.params.handle, req.params.start, req.params.end ];
@@ -44,17 +46,19 @@ app.get('/:country/:category/website/:handle/:start/:end', function(req, res) {
   });
 });
 
-//- http://localhost:3000/US/news/tag/Snowden
-app.get('/:country/:category/tag/:tag', function(req, res) {
+//- http://localhost:3000/US/news/tag/Snowden/0/9
+app.get('/:country/:category/tag/:tag/:start/:end', function(req, res) {
   var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
   var tagKey = parserUtil.getTagKey(todayKey);
   var tagUrls = tagKey+":"+req.params.tag;
-  client.smembers(tagUrls, function(err, urls){
+  var args = [ tagUrls, req.params.start, req.params.end ];
+  
+  client.zrevrange(args, function(err, urls){
     response(urls,res);
   });
 });
 
-//- http://localhost:3000/US/news/all
+//- http://localhost:3000/US/news/all/0/9
 app.get('/:country/:category/all/:start/:end', function(req, res) {
   var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
   var args = [ todayKey+":url", req.params.start, req.params.end ];

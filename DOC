@@ -4,25 +4,23 @@ todayKey=IN:news:06/26/2013
 
 zadd IN:news:06/26/2013:url timesofindia.com/something.html
 hmset timesofindia.com/something.html title 'something' summary 'something' published_at 'sometime' website 'something' inserted_at 'sometime' source 'handle'
-sadd IN:news:06/26/2013:handle timesofindia.com/something.html
-sadd IN:news:06/26/2013:tag anoop
-set/incr IN:news:06/26/2013:tag:anoop:count 5
-sadd IN:news:06/26/2013:tag:anoop timesofindia.com/something.html
+zadd IN:news:06/26/2013:handle timesofindia.com/something.html
+zincrby IN:news:06/26/2013:tag 1 anoop
+zadd IN:news:06/26/2013:tag:anoop timesofindia.com/something.html
 
 //express
 
-http://localhost:3000/US/news/tag
-smembers IN:news:06/26/2013:tag
-get IN:news:06/26/2013:tag:anoop:count
+http://localhost:3000/US/news/tag/0/99
+zrevrange IN:news:06/26/2013:tag 0 99
 
 http://localhost:3000/US/news/website/CNN-IBN/11/20
-SRANDMEMBER IN:news:06/26/2013:handle 10
+zrevrange IN:news:06/26/2013:CNN-IBN 11 20
 hgetall timesofindia.com/something.html title summary url website published source
 
-http://localhost:3000/US/news/tag/Snowden
-smembers IN:news:06/26/2013:tag:snowden
+http://localhost:3000/US/news/tag/Snowden/0/9
+zrevrange IN:news:06/26/2013:tag:snowden 0 9
 hgetall timesofindia.com/something.html title summary url website published source
 
-http://localhost:3000/US/news/all/0/10
-zrevrange IN:news:06/26/2013:url 10
+http://localhost:3000/US/news/all/0/9
+zrevrange IN:news:06/26/2013:url 9
 hgetall timesofindia.com/something.html title summary url website published source
