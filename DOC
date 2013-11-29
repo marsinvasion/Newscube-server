@@ -2,7 +2,7 @@ todayKey=IN:news:06/26/2013
 
 //database
 
-sadd IN:news:06/26/2013:url timesofindia.com/something.html
+zadd IN:news:06/26/2013:url timesofindia.com/something.html
 hmset timesofindia.com/something.html title 'something' summary 'something' published_at 'sometime' website 'something' inserted_at 'sometime' source 'handle'
 sadd IN:news:06/26/2013:handle timesofindia.com/something.html
 sadd IN:news:06/26/2013:tag anoop
@@ -23,6 +23,6 @@ http://localhost:3000/US/news/tag/Snowden
 smembers IN:news:06/26/2013:tag:snowden
 hgetall timesofindia.com/something.html title summary url website published source
 
-http://localhost:3000/US/news/random
-SRANDMEMBER IN:news:06/26/2013:url 10
+http://localhost:3000/US/news/all/0/10
+zrevrange IN:news:06/26/2013:url 10
 hgetall timesofindia.com/something.html title summary url website published source

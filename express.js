@@ -51,10 +51,13 @@ app.get('/:country/:category/tag/:tag', function(req, res) {
   });
 });
 
-//- http://localhost:3000/US/news/random
-app.get('/:country/:category/random', function(req, res) {
+//- http://localhost:3000/US/news/all
+app.get('/:country/:category/all/:start/:end', function(req, res) {
   var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
-  client.SRANDMEMBER(todayKey+":url", 10, function(err, urls){
+  var args = [ todayKey+":url", req.params.start, req.params.end ];
+  client.zrevrange(args, function(err, urls){
+    if(err)
+	throw err;
     response(urls,res);
   });
 });

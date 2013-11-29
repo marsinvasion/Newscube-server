@@ -1,4 +1,5 @@
 var IGNORED_DICTIONARY_KEY = "ignored_dictionary";
+var score = 1;
 
 var stripHtml = function(htmlString){
   htmlString = htmlString.replace(/<(?:.|\n)*?>/gm, '').trim();
@@ -27,7 +28,8 @@ var parseFeed = function(client, out, config, dictionaryKey, handle){
 		}
 //		client.sadd("country:date", todayKey); // sadd country:category:date US:news:05/01/2013
              	var urlKey = todayKey+":url";
-             	client.sadd(urlKey, item.url, function (error, reply){ // sadd US:news:05/01/2013:url cnn.com/rss/sweet.html
+             	var args = [ urlKey, score, item.url ];
+		client.zadd(args, function (error, reply){ // sadd US:news:05/01/2013:url cnn.com/rss/sweet.html
                         if(reply == 1){ //url did not exist in db, save feed details
 			client.HMSET(item.url,{
                                       "title":stripHtml(title),
