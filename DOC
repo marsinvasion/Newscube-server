@@ -1,0 +1,28 @@
+todayKey=IN:news:06/26/2013
+
+//database
+
+sadd IN:news:06/26/2013:url timesofindia.com/something.html
+hmset timesofindia.com/something.html title 'something' summary 'something' published_at 'sometime' website 'something' inserted_at 'sometime' source 'handle'
+sadd IN:news:06/26/2013:handle timesofindia.com/something.html
+sadd IN:news:06/26/2013:tag anoop
+set/incr IN:news:06/26/2013:tag:anoop:count 5
+sadd IN:news:06/26/2013:tag:anoop timesofindia.com/something.html
+
+//express
+
+http://localhost:3000/US/news/tag
+smembers IN:news:06/26/2013:tag
+get IN:news:06/26/2013:tag:anoop:count
+
+http://localhost:3000/US/news/website/CNN-IBN
+SRANDMEMBER IN:news:06/26/2013:handle 10
+hgetall timesofindia.com/something.html title summary url website published source
+
+http://localhost:3000/US/news/tag/Snowden
+smembers IN:news:06/26/2013:tag:snowden
+hgetall timesofindia.com/something.html title summary url website published source
+
+http://localhost:3000/US/news/random
+SRANDMEMBER IN:news:06/26/2013:url 10
+hgetall timesofindia.com/something.html title summary url website published source
