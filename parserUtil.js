@@ -41,7 +41,11 @@ var parseFeed = function(client, out, config, dictionaryKey, handle){
 				      
                                       } ); // hmset cnn.com/rss/sweet.html title "my title" summary "sweet summary" published_at today inserted_at today
                         console.log("Saved", urlKey, item.url);
-			client.sadd(todayKey+":"+handle, item.url);
+			var args1 = [ todayKey+":"+handle, score, item.url ];
+			client.zadd(args1, function (error, reply){
+			  if(error)
+				throw error;
+			});
                         var regex = /[a-zA-Z]+/g
                         var matched = summary.toString().match(regex);
                         if(matched){

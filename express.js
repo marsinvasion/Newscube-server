@@ -33,10 +33,13 @@ app.get('/:country/:category/tag', function(req, res) {
   });
 });
 
-//- http://localhost:3000/US/news/website/cnn.com
-app.get('/:country/:category/website/:website', function(req, res) {
+//- http://localhost:3000/US/news/website/CNN-IBN/11/20
+app.get('/:country/:category/website/:handle/:start/:end', function(req, res) {
   var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
-  client.SRANDMEMBER(todayKey+":"+req.params.website,10, function(err, urls){
+  var args = [ todayKey+":"+req.params.handle, req.params.start, req.params.end ];
+  client.zrevrange(args, function(err, urls){
+    if(err)
+	throw err;
     response(urls,res);
   });
 });

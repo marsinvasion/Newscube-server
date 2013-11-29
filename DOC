@@ -15,7 +15,7 @@ http://localhost:3000/US/news/tag
 smembers IN:news:06/26/2013:tag
 get IN:news:06/26/2013:tag:anoop:count
 
-http://localhost:3000/US/news/website/CNN-IBN
+http://localhost:3000/US/news/website/CNN-IBN/11/20
 SRANDMEMBER IN:news:06/26/2013:handle 10
 hgetall timesofindia.com/something.html title summary url website published source
 
