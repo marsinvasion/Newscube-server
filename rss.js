@@ -16,6 +16,7 @@ var cronFunc = function(handle){
   var config = job.config;
   console.log("Starting", handle, date);
   var parse = function (){
+     console.log("Kicking off "+handle);
 	try{
 	parser.parseURL(config.url, {}, function(err, out){
     	  if(err){
