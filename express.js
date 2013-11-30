@@ -1,5 +1,9 @@
 var express = require('express');
 var app = express();
+app.configure(function(){
+  app.use(express.bodyParser());
+  app.use(app.router);
+});
 var redis = require("redis"),
         client = redis.createClient();
 client.on("error", function (err) {
@@ -8,6 +12,9 @@ client.on("error", function (err) {
 var parserUtil = require('./parserUtil');
 var async = require('async');
 var minTagCount = 30;
+
+// GET
+
 app.get('/status', function(req, res) {
 
   client.ping(function(err, reply){
@@ -95,22 +102,19 @@ var response = function(urls, res){
     });
 };
 
-var sort = function(a, b){
-	return b.count - a.count;
-};
 
-var getResponse = function(tag, tagKey, json, callback){
-	client.get(tagKey+":"+tag+":count", function(err, reply){
-	  if(err) return callback(err);
-	  if(reply>minTagCount){
-	    var obj = {};
-            obj.tag = tag;
-            obj.count = reply;
-	    json.push(obj);
-	  }
-	  callback();
-	});
-};
+// PUT
+
+app.put('/vote', function(req, res) {
+  var id = req.headers['id'];
+  var accountName = req.headers['account-name'];
+  var json = [];
+  json.push(id);
+  json.push(accountName);
+  json.push(req.body.url);
+  json.push(req.body.comment);
+  res.json(json);
+});
 
 var port = process.env.PORT || 3000;
 app.listen(port);
