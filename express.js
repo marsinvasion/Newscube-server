@@ -106,6 +106,9 @@ var response = function(urls, res){
 // PUT
 
 app.put('/vote', function(req, res) {
+  require('crypto').randomBytes(3, function(ex, buf) {
+   console.log("random string "+buf.toString('hex'));
+  });
   var id = req.headers['id'];
   var accountName = req.headers['account-name'];
   var json = [];
@@ -115,6 +118,74 @@ app.put('/vote', function(req, res) {
   json.push(req.body.comment);
   res.json(json);
 });
+
+var idLength = 3;
+var getRandomId = function (length){
+  var id = '';
+  require('crypto').randomBytes(3, function(ex, buf) {
+     id = buf.toString('hex');
+  });
+  return id;
+};
+
+app.put('/comment', function(req, res) {
+  console.log("received comment "+req.body);
+  var accountName = req.headers['account-name'];
+  var displayName = req.headers['display-name'];
+  var googleId = req.headers['google-id'];
+  var firstName = req.headers['first-name'];
+  var lastName = req.headers['last-name'];
+  if(!googleId || !accountName){
+    res.statusCode = 401;
+  }else{
+    res.statusCode = 200;
+  var url = req.body.url;
+  debugger;
+  var headComment = req.body.headComment;
+  var comment = req.body.comment;
+  addComment(idLength, accountName, comment, url, headComment);
+  }
+  res.end();
+});
+
+var addComment = function(idLength, accountName, comment, url, headComment){
+
+  require('crypto').randomBytes(idLength, function(ex, buf) {
+    var randomId = buf.toString('hex');
+    var commentId = randomId+":comment";
+    client.hexists(commentId, "comment", function (err, res){
+	debugger;  
+    	if (err)
+	  throw err;
+	if (res == 1){
+	  addComment(idLength + 1, comment, accountName, url); //recursively increase id length till you find an unique id
+	}else{
+	
+	  client.hmset(commentId, {
+	    "comment":comment,
+	    "accountName":accountName
+	  }, function (err, response){
+		if(err)
+		  throw err;
+	  });
+	debugger;
+	  if(headComment){
+	    var args = [ headComment, 1, randomId];
+	    client.zadd(args, function (err, reply){
+		if(err)
+		  throw err;
+	    });  
+	  } else {
+	    var args = [ url+":comments", 1, randomId ];
+	    client.zadd(args, function (err, reply){
+	      if(err)
+	 	throw err;
+	    });
+	  }
+	}
+    });
+  }); 
+};
 
 var port = process.env.PORT || 3000;
 app.listen(port);

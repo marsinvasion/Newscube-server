@@ -24,3 +24,31 @@ hgetall timesofindia.com/something.html title summary url website published sour
 http://localhost:3000/US/news/all/0/9
 zrevrange IN:news:06/26/2013:url 9
 hgetall timesofindia.com/something.html title summary url website published source
+
+http://localhost:3000/comment
+Header:
+id: 34534kfeffer
+account-name: anoop.kulkarni@gmail.com
+Body:
+{
+    "url": "http://www.thehindu.com/sci-tech/science/mars-orbiter-poised-for-final-toss-off-earth-on-sunday/article5407608.ece",
+    "head-comment": "",
+    "comment": "My first comment"
+}
+hexists randomId comment
+hmset randomId:comment comment "my first comment" accountName "anoop.kulkarni@gmail.com"
+zadd url:comments 1 randomId
+
+Header:
+id: 34534kfeffer
+account-name: anoop.kulkarni@gmail.com
+Body:
+{
+    "url": "http://www.thehindu.com/sci-tech/science/mars-orbiter-poised-for-final-toss-off-earth-on-sunday/article5407608.ece",
+    "head-comment": "dfsd23",
+    "comment": "My second comment"
+}
+
+hexists randomId comment
+hmset randomId:comment comment "my second comment" accountName "anoop.kulkarni@gmail.com"
+zadd dfsd23 1 randomId
