@@ -1,4 +1,5 @@
 var express = require('express');
+var wait=require('wait.for');
 var app = express();
 app.configure(function(){
   app.use(express.bodyParser());
@@ -51,7 +52,7 @@ app.get('/:country/:category/tag/:tag/:start/:end', function(req, res) {
   
   client.zrevrange(args, function(err, ids){
     if(ids && ids.length>0){
-      idsToUrls(ids,res);
+      wait.launchFiber(idsToUrls, ids, res);
     }else{
         res.statusCode = 404;
         res.end();
@@ -63,11 +64,12 @@ app.get('/:country/:category/tag/:tag/:start/:end', function(req, res) {
 app.get('/:country/:category/website/:handle/:start/:end', function(req, res) {
   var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
   var args = [ todayKey+":"+req.params.handle, req.params.start, req.params.end ];
+  debugger;
   client.zrevrange(args, function(err, ids){
     if(err)
 	throw err;
     if(ids && ids.length>0){
-      idsToUrls(ids,res);
+      wait.launchFiber(idsToUrls, ids, res);
     }else{
         res.statusCode = 404;
         res.end();
@@ -84,7 +86,8 @@ app.get('/:country/:category/all/:start/:end', function(req, res) {
     if(err)
 	throw err;
     if(ids && ids.length>0){
-      idsToUrls(ids,res);
+      wait.launchFiber(idsToUrls, ids, res);
+      //idsToUrls(ids,res);
     }else{
 	res.statusCode = 404;
 	res.end();
@@ -94,86 +97,51 @@ app.get('/:country/:category/all/:start/:end', function(req, res) {
 
 var idsToUrls = function(ids, res){
   var json = [];
-  async.each(ids, function(id, callback){
-    client.get(id+":url", function(err, url){
-      if(err) return callback(err);
-      client.hgetall(url, function(err, reply){
-	  if(err) return callback(err);
-	  if(reply){
+  for(var i = 0; i < ids.length; i++){
+	wait.for(getNewsFromId, ids[i], json);
+  }  
+  res.json(json);
+};
+
+var getNewsFromId = function(id, json){
+    debugger;
+    var url = wait.for(client.get.bind(client), id+":url");
+    var reply = wait.for(client.hgetall.bind(client),url);
+    if(reply){
             var obj = {};
             obj.title = reply.title;
             obj.summary = reply.summary;
             obj.website = reply.website;
             obj.published = reply.published_at;
             obj.source = reply.source;
-	    obj.id = reply.id;
-	    obj.url = url;
-	    obj.comments = getComments(id, callback); 
-	    json.push(obj);
-          }
-      });
-     });
-    }, function(err){
-	debugger;
-      if(err)
-	throw err;
-      res.json(json);
-    });
+            obj.id = reply.id;
+            obj.url = url;
+	    obj.comments = [];
+            wait.for(getComments, id, obj.comments);
+        json.push(obj);
+    }
 };
 
-var getComments = function(id, callback){
-  var comments = [];
+var getComments = function(id, comments){
   var args = [id, 0, -1, "withscores"];
-  client.zrevrange(args, function(err, commentIds){
-    if(err) throw err;
-    if(commentIds.length == 0){
-	callback();
-    }
+  var commentIds = wait.for(client.zrevrange.bind(client), args);
     for(var i= 0; i<commentIds.length; i=i+2){
-	populateComment(i, commentIds, callback, comments);
+      var commentId = commentIds[i];
+      var score = commentIds[i+1];
+      var reply = wait.for(client.hgetall.bind(client), commentId+":comment");
+      var commentObj = {};
+      commentObj.score = score;
+      commentObj.comment = reply.comment;
+      commentObj.accountName = reply.accountName;
+      commentObj.firstName = reply.firstName;
+      commentObj.id = commentId;
+      comments.push(commentObj);
+      commentObj.comments = [];
+      wait.for(getComments, commentId, commentObj.comments);
     }
-  });
-  return comments;
 };
-
-var populateComment = function(i, commentIds, callback, comments){
-  var commentId = commentIds[i];
-  var score = commentIds[i+1];
-  client.hgetall(commentId+":comment", function(err,reply){
-    var commentObj = {};
-    commentObj.score = score;
-    commentObj.comment = reply.comment;
-    commentObj.accountName = reply.accountName;
-    commentObj.firstName = reply.firstName;
-    commentObj.id = commentId;
-    comments.push(commentObj);
-    debugger;
-    commentObj.comments = getComments(commentId, commentCallback(i, commentIds.length, callback));
-  });
-}
-
-var commentCallback = function(current, last, callback){
-	debugger;
-	if(current == last-2 && callback!=null){
-	 callback();
-	}
-}
 
 // PUT
-
-app.put('/vote', function(req, res) {
-  require('crypto').randomBytes(3, function(ex, buf) {
-   console.log("random string "+buf.toString('hex'));
-  });
-  var id = req.headers['id'];
-  var accountName = req.headers['account-name'];
-  var json = [];
-  json.push(id);
-  json.push(accountName);
-  json.push(req.body.url);
-  json.push(req.body.comment);
-  res.json(json);
-});
 
 var idLength = 3;
 
