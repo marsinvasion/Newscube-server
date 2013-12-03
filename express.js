@@ -146,7 +146,6 @@ var getComments = function(id, comments){
 var idLength = 3;
 
 app.put('/comment', function(req, res) {
-  console.log("received comment "+req.body);
   var accountName = req.headers['account-name'];
   var displayName = req.headers['display-name'];
   var googleId = req.headers['google-id'];

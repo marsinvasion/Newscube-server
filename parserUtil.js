@@ -112,7 +112,7 @@ var saveMatch = function(word, dictionaryKey, item, todayKey, randomId){
 		var first = word.charAt(0);
 		if(first == first.toUpperCase() && first != first.toLowerCase()){
         	  //console.log("saving upper case tag", word);
-		  saveAndIncrementTagCount(todayKey, matchKey, client, item.url);
+		  saveAndIncrementTagCount(todayKey, matchKey, client, randomId);
 		}//end uppercase word check
 		else {
 		  //console.log("rejected word", word);
