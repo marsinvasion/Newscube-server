@@ -42,17 +42,6 @@ app.get('/:country/:category/tag/:start/:end', function(req, res) {
   });
 });
 
-//- http://localhost:3000/US/news/website/CNN-IBN/10/19
-app.get('/:country/:category/website/:handle/:start/:end', function(req, res) {
-  var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
-  var args = [ todayKey+":"+req.params.handle, req.params.start, req.params.end ];
-  client.zrevrange(args, function(err, urls){
-    if(err)
-	throw err;
-    response(urls,res);
-  });
-});
-
 //- http://localhost:3000/US/news/tag/Snowden/0/9
 app.get('/:country/:category/tag/:tag/:start/:end', function(req, res) {
   var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
@@ -60,48 +49,115 @@ app.get('/:country/:category/tag/:tag/:start/:end', function(req, res) {
   var tagUrls = tagKey+":"+req.params.tag;
   var args = [ tagUrls, req.params.start, req.params.end ];
   
-  client.zrevrange(args, function(err, urls){
-    response(urls,res);
+  client.zrevrange(args, function(err, ids){
+    if(ids && ids.length>0){
+      idsToUrls(ids,res);
+    }else{
+        res.statusCode = 404;
+        res.end();
+    }
   });
 });
+
+//- http://localhost:3000/US/news/website/CNN-IBN/10/19
+app.get('/:country/:category/website/:handle/:start/:end', function(req, res) {
+  var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
+  var args = [ todayKey+":"+req.params.handle, req.params.start, req.params.end ];
+  client.zrevrange(args, function(err, ids){
+    if(err)
+	throw err;
+    if(ids && ids.length>0){
+      idsToUrls(ids,res);
+    }else{
+        res.statusCode = 404;
+        res.end();
+    }    
+  });
+});
+
 
 //- http://localhost:3000/US/news/all/0/9
 app.get('/:country/:category/all/:start/:end', function(req, res) {
   var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
   var args = [ todayKey+":url", req.params.start, req.params.end ];
-  client.zrevrange(args, function(err, urls){
+  client.zrevrange(args, function(err, ids){
     if(err)
 	throw err;
-    response(urls,res);
+    if(ids && ids.length>0){
+      idsToUrls(ids,res);
+    }else{
+	res.statusCode = 404;
+	res.end();
+    }
   });
 });
 
-var response = function(urls, res){
-    var json = [];
-    async.each(urls, function(url, callback){
-        client.hgetall(url, function(err, reply){
-          if(err) return callback(err);
-          if(reply){
-	  var obj = {};
-          obj.title = reply.title;
-          obj.summary = reply.summary;
-          obj.url = url;
-          obj.website = reply.website;
-	  obj.published = reply.published_at;
-	  obj.source = reply.source;
-	  json.push(obj);
-          callback();
-	  }else{
-            console.log("null item", reply);
-	  }
-        })
+var idsToUrls = function(ids, res){
+  var json = [];
+  async.each(ids, function(id, callback){
+    client.get(id+":url", function(err, url){
+      if(err) return callback(err);
+      client.hgetall(url, function(err, reply){
+	  if(err) return callback(err);
+	  if(reply){
+            var obj = {};
+            obj.title = reply.title;
+            obj.summary = reply.summary;
+            obj.website = reply.website;
+            obj.published = reply.published_at;
+            obj.source = reply.source;
+	    obj.id = reply.id;
+	    obj.url = url;
+	    obj.comments = getComments(id, callback); 
+	    json.push(obj);
+          }
+      });
+     });
     }, function(err){
-        debugger;
-        if(err) throw err;
-        res.json(json);
+	debugger;
+      if(err)
+	throw err;
+      res.json(json);
     });
 };
 
+var getComments = function(id, callback){
+  var comments = [];
+  var args = [id, 0, -1, "withscores"];
+  client.zrevrange(args, function(err, commentIds){
+    if(err) throw err;
+    if(commentIds.length == 0){
+	callback();
+    }
+    for(var i= 0; i<commentIds.length; i=i+2){
+	populateComment(i, commentIds, callback, comments);
+    }
+  });
+  return comments;
+};
+
+var populateComment = function(i, commentIds, callback, comments){
+  var commentId = commentIds[i];
+  var score = commentIds[i+1];
+  client.hgetall(commentId+":comment", function(err,reply){
+    var commentObj = {};
+    commentObj.score = score;
+    commentObj.comment = reply.comment;
+    commentObj.accountName = reply.accountName;
+    commentObj.firstName = reply.firstName;
+    commentObj.id = commentId;
+    comments.push(commentObj);
+    debugger;
+    commentObj.comments = getComments(commentId, commentCallback(i, commentIds.length, callback));
+  });
+}
+
+var commentCallback = function(current, last, callback){
+	debugger;
+	if(current == last-2 && callback!=null){
+	 callback();
+	}
+}
 
 // PUT
 
@@ -120,13 +176,6 @@ app.put('/vote', function(req, res) {
 });
 
 var idLength = 3;
-var getRandomId = function (length){
-  var id = '';
-  require('crypto').randomBytes(3, function(ex, buf) {
-     id = buf.toString('hex');
-  });
-  return id;
-};
 
 app.put('/comment', function(req, res) {
   console.log("received comment "+req.body);
@@ -139,16 +188,16 @@ app.put('/comment', function(req, res) {
     res.statusCode = 401;
   }else{
     res.statusCode = 200;
-  var url = req.body.url;
-  debugger;
-  var headComment = req.body.headComment;
-  var comment = req.body.comment;
-  addComment(idLength, accountName, comment, url, headComment);
+    var url = req.body.url;
+    debugger;
+    var headComment = req.body.headComment;
+    var comment = req.body.comment;
+    addComment(idLength, accountName, comment, url, headComment, firstName, displayName);
   }
   res.end();
 });
 
-var addComment = function(idLength, accountName, comment, url, headComment){
+var addComment = function(idLength, accountName, comment, url, headComment, firstName, displayName){
 
   require('crypto').randomBytes(idLength, function(ex, buf) {
     var randomId = buf.toString('hex');
@@ -158,30 +207,24 @@ var addComment = function(idLength, accountName, comment, url, headComment){
     	if (err)
 	  throw err;
 	if (res == 1){
-	  addComment(idLength + 1, comment, accountName, url); //recursively increase id length till you find an unique id
+	  addComment(idLength + 1, comment, accountName, url, firstName, displayName); //recursively increase id length till you find an unique id
 	}else{
 	
 	  client.hmset(commentId, {
 	    "comment":comment,
-	    "accountName":accountName
+	    "accountName":accountName,
+	    "displayName":displayName,
+	    "firstName":firstName
 	  }, function (err, response){
 		if(err)
 		  throw err;
 	  });
 	debugger;
-	  if(headComment){
 	    var args = [ headComment, 1, randomId];
 	    client.zadd(args, function (err, reply){
 		if(err)
 		  throw err;
 	    });  
-	  } else {
-	    var args = [ url+":comments", 1, randomId ];
-	    client.zadd(args, function (err, reply){
-	      if(err)
-	 	throw err;
-	    });
-	  }
 	}
     });
   }); 
