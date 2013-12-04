@@ -48,40 +48,27 @@ app.get('/:country/:category/tag/:tag/:start/:end', function(req, res) {
   var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
   var tagKey = parserUtil.getTagKey(todayKey);
   var tagUrls = tagKey+":"+req.params.tag;
-  var args = [ tagUrls, req.params.start, req.params.end ];
-  
-  client.zrevrange(args, function(err, ids){
-    if(ids && ids.length>0){
-      wait.launchFiber(idsToUrls, ids, res);
-    }else{
-        res.statusCode = 404;
-        res.end();
-    }
-  });
+  var args = [ tagUrls, req.params.start, req.params.end, "withscores" ];
+  getIds(args, res);
 });
 
 //- http://localhost:3000/US/news/website/CNN-IBN/10/19
 app.get('/:country/:category/website/:handle/:start/:end', function(req, res) {
   var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
-  var args = [ todayKey+":"+req.params.handle, req.params.start, req.params.end ];
-  debugger;
-  client.zrevrange(args, function(err, ids){
-    if(err)
-	throw err;
-    if(ids && ids.length>0){
-      wait.launchFiber(idsToUrls, ids, res);
-    }else{
-        res.statusCode = 404;
-        res.end();
-    }    
-  });
+  var args = [ todayKey+":"+req.params.handle, req.params.start, req.params.end, "withscores" ];
+  getIds(args, res);
 });
 
 
 //- http://localhost:3000/US/news/all/0/9
 app.get('/:country/:category/all/:start/:end', function(req, res) {
   var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
-  var args = [ todayKey+":url", req.params.start, req.params.end ];
+  var args = [ todayKey+":url", req.params.start, req.params.end, "withscores" ];
+  getIds(args, res);
+});
+
+var getIds = function(args, res){
+
   client.zrevrange(args, function(err, ids){
     if(err)
 	throw err;
@@ -93,28 +80,29 @@ app.get('/:country/:category/all/:start/:end', function(req, res) {
 	res.end();
     }
   });
-});
+};
 
 var idsToUrls = function(ids, res){
   var json = [];
-  for(var i = 0; i < ids.length; i++){
-	wait.for(getNewsFromId, ids[i], json);
+  for(var i = 0; i < ids.length; i = i+2){
+	wait.for(getNewsFromId, ids[i], ids[i+1], json);
   }  
   res.json(json);
 };
 
-var getNewsFromId = function(id, json){
+var getNewsFromId = function(id, score, json){
     debugger;
     var url = wait.for(client.get.bind(client), id+":url");
     var reply = wait.for(client.hgetall.bind(client),url);
     if(reply){
             var obj = {};
-            obj.title = reply.title;
+            obj.id = id;
+            obj.score = score;
+	    obj.title = reply.title;
             obj.summary = reply.summary;
             obj.website = reply.website;
             obj.published = reply.published_at;
             obj.source = reply.source;
-            obj.id = reply.id;
             obj.url = url;
 	    obj.comments = [];
             wait.for(getComments, id, obj.comments);
@@ -130,11 +118,11 @@ var getComments = function(id, comments){
       var score = commentIds[i+1];
       var reply = wait.for(client.hgetall.bind(client), commentId+":comment");
       var commentObj = {};
+      commentObj.id = commentId;
       commentObj.score = score;
       commentObj.comment = reply.comment;
       commentObj.accountName = reply.accountName;
       commentObj.firstName = reply.firstName;
-      commentObj.id = commentId;
       comments.push(commentObj);
       commentObj.comments = [];
       wait.for(getComments, commentId, commentObj.comments);
