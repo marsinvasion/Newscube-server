@@ -118,12 +118,14 @@ var getComments = function(id, comments){
       var score = commentIds[i+1];
       var reply = wait.for(client.hgetall.bind(client), commentId+":comment");
       var commentObj = {};
+      comments.push(commentObj);
       commentObj.id = commentId;
       commentObj.score = score;
       commentObj.comment = reply.comment;
       commentObj.accountName = reply.accountName;
       commentObj.firstName = reply.firstName;
-      comments.push(commentObj);
+      commentObj.displayName = reply.displayName;
+      commentObj.inserted_at = reply.inserted_at;
       commentObj.comments = [];
       wait.for(getComments, commentId, commentObj.comments);
     }
@@ -145,7 +147,7 @@ app.put('/comment', function(req, res) {
     res.statusCode = 200;
     var url = req.body.url;
     debugger;
-    var headComment = req.body.headComment;
+    var headComment = req.body.head;
     var comment = req.body.comment;
     addComment(idLength, accountName, comment, url, headComment, firstName, displayName);
   }
@@ -169,7 +171,8 @@ var addComment = function(idLength, accountName, comment, url, headComment, firs
 	    "comment":comment,
 	    "accountName":accountName,
 	    "displayName":displayName,
-	    "firstName":firstName
+	    "firstName":firstName,
+	    "inserted_at":new Date()
 	  }, function (err, response){
 		if(err)
 		  throw err;
