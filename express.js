@@ -60,10 +60,17 @@ app.get('/:country/:category/website/:handle/:start/:end', function(req, res) {
 });
 
 
-//- http://localhost:3000/US/news/all/0/9
-app.get('/:country/:category/all/:start/:end', function(req, res) {
+//- http://localhost:3000/US/news/today/0/9
+app.get('/:country/:category/today/:start/:end', function(req, res) {
   var todayKey = parserUtil.getTodayKey(req.params.country, req.params.category);
   var args = [ todayKey+":url", req.params.start, req.params.end, "withscores" ];
+  getIds(args, res);
+});
+
+
+//- http://localhost:3000/US/news/trending/0/9
+app.get('/:country/:category/trending/:start/:end', function(req, res) {
+  var args = [ req.params.country+":"+req.params.category+":trending", req.params.start, req.params.end, "withscores" ];
   getIds(args, res);
 });
 
@@ -91,7 +98,6 @@ var idsToUrls = function(ids, res){
 };
 
 var getNewsFromId = function(id, score, json){
-    debugger;
     var url = wait.for(client.get.bind(client), id+":url");
     var reply = wait.for(client.hgetall.bind(client),url);
     if(reply){
@@ -135,7 +141,7 @@ var getComments = function(id, comments){
 
 var idLength = 3;
 
-app.put('/comment', function(req, res) {
+app.put('/:country/:category/comment', function(req, res) {
   var accountName = req.headers['account-name'];
   var displayName = req.headers['display-name'];
   var googleId = req.headers['google-id'];
@@ -145,16 +151,15 @@ app.put('/comment', function(req, res) {
     res.statusCode = 401;
   }else{
     res.statusCode = 200;
-    var url = req.body.url;
     debugger;
-    var headComment = req.body.head;
+    var headId = req.body.head;
     var comment = req.body.comment;
-    addComment(idLength, accountName, comment, url, headComment, firstName, displayName);
+    addComment(idLength, accountName, comment, headId, firstName, displayName, req.params.country, req.params.category);
   }
   res.end();
 });
 
-var addComment = function(idLength, accountName, comment, url, headComment, firstName, displayName){
+var addComment = function(idLength, accountName, comment, headId, firstName, displayName, country, category){
 
   require('crypto').randomBytes(idLength, function(ex, buf) {
     var randomId = buf.toString('hex');
@@ -164,9 +169,8 @@ var addComment = function(idLength, accountName, comment, url, headComment, firs
     	if (err)
 	  throw err;
 	if (res == 1){
-	  addComment(idLength + 1, comment, accountName, url, firstName, displayName); //recursively increase id length till you find an unique id
+	  addComment(idLength + 1, accountName, comment, headId, firstName, displayName, country, category); //recursively increase id length till you find an unique id
 	}else{
-	
 	  client.hmset(commentId, {
 	    "comment":comment,
 	    "accountName":accountName,
@@ -178,11 +182,26 @@ var addComment = function(idLength, accountName, comment, url, headComment, firs
 		  throw err;
 	  });
 	debugger;
-	    var args = [ headComment, 1, randomId];
-	    client.zadd(args, function (err, reply){
+	    var args = [ headId, 1, randomId];
+	    client.zincrby(args, function (err, reply){
 		if(err)
 		  throw err;
 	    });  
+	    client.get(headId+":url", function (err, reply){
+		if(err) throw err;
+		debugger;
+		if(reply){
+		  var trend = [ country+":"+category+":trending", 1, headId ];
+		  client.zincrby(trend, function (err, res){
+		    if(err) throw err;
+		  });
+		  var todayKey = parserUtil.getTodayKey(country, category);
+		  var todayUrls = [ todayKey+":url", 1, headId ];
+		  client.zincrby(todayUrls, function (err, res){
+                    if(err) throw err;
+                  });
+		}
+	    });
 	}
     });
   }); 
