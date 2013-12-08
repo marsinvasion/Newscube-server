@@ -17,6 +17,7 @@
     {"handle":"Telegraph","cron":"38 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://www.telegraphindia.com/feeds/rss.jsp?id=3","country":"IN", "category":"news", "website":"http://telegraphindia.com"}},
     {"handle":"Reuters India","cron":"40 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://feeds.reuters.com/reuters/INtopNews","country":"IN", "category":"news", "website":"http://reuters.com"}},
     {"handle":"One India","cron":"42 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://news.oneindia.in/rss/news-india-fb.xml","country":"IN", "category":"news", "website":"http://oneindia.in"}},
+    {"handle":"First Post","cron":"44 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://www.firstpost.com/feed","country":"IN", "category":"news", "website":"http://www.firstpost.com"}},
     {"handle":"Zee news","cron":"48 * * * *","timezone":"Asia/Kolkata","start":"false","config":{"url":"http://zeenews.india.com/rss/nation.aspx","country":"IN", "category":"news", "website":"http://zeenews.india.com"}}
   ]
 }
