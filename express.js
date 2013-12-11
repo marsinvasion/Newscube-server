@@ -140,24 +140,69 @@ var getComments = function(id, comments){
 // PUT
 
 var idLength = 3;
+app.put('/:country/:category/registerDevice', function(req, res) {
+  var person = getPerson(req.headers)
+  if(!person.googleId || !person.accountName){
+    res.statusCode = 401;
+  }else{
+    var id = req.body.regid;
+    addRegisteredId(id, person, req.params.country, req.params.category);
+  }
+  res.end();
+});
 
 app.put('/:country/:category/comment', function(req, res) {
-  var accountName = req.headers['account-name'];
-  var displayName = req.headers['display-name'];
-  var googleId = req.headers['google-id'];
-  var firstName = req.headers['first-name'];
-  var lastName = req.headers['last-name'];
-  if(!googleId || !accountName){
+  var person = getPerson(req.headers)  
+  if(!person.googleId || !person.accountName){
     res.statusCode = 401;
   }else{
     res.statusCode = 200;
     debugger;
     var headId = req.body.head;
     var comment = req.body.comment;
-    addComment(idLength, accountName, comment, headId, firstName, displayName, req.params.country, req.params.category);
+    addAccount(person);
+    addComment(idLength, person.accountName, comment, headId, person.firstName, person.displayName, req.params.country, req.params.category);
   }
   res.end();
 });
+
+var addRegisteredId = function (id, person, country, category){
+  client.hset(person.accountName, "registeredId", id, function (err, response){
+    if(err) throw err;
+    if(response == 1){
+      client.lpush(country+":"+category+":registered_ids", function (err, res){
+        if(err) throw err;
+      });
+    };
+
+  });
+};
+
+var getPerson = function(headers){
+  var person = {};
+  person.accountName = headers['account-name'];
+  person.displayName = headers['display-name'];
+  person.googleId = headers['google-id'];
+  person.firstName = headers['first-name'];
+  person.lastName = headers['last-name'];
+  return person;
+};
+
+var addAccount = function(person){
+  client.hexists(person.accountName, "displayName", function (err, res){
+    if(err) throw err;
+    if(!res){
+	client.hmset(person.accountName, {
+	  "displayName": person.displayName,
+	  "googleId": person.googleId,
+	  "firstName": person.firstName,
+	  "lastName": person.lastName
+	}, function (err, res){
+	    if(err) throw err;
+	});
+    }
+  });
+};
 
 var addComment = function(idLength, accountName, comment, headId, firstName, displayName, country, category){
 
@@ -187,26 +232,29 @@ var addComment = function(idLength, accountName, comment, headId, firstName, dis
 		if(err)
 		  throw err;
 	    });  
-	    client.get(headId+":url", function (err, reply){
-		if(err) throw err;
-		debugger;
-		if(reply){
-		  var trend = [ country+":"+category+":trending", 1, headId ];
-		  client.zincrby(trend, function (err, res){
-		    if(err) throw err;
-		  });
-		  var todayKey = parserUtil.getTodayKey(country, category);
-		  var todayUrls = [ todayKey+":url", 1, headId ];
-		  client.zincrby(todayUrls, function (err, res){
-                    if(err) throw err;
-                  });
-		}
-	    });
+	    incrUrl(headId, country, category);
 	}
     });
   }); 
 };
 
+var incrUrl = function (headId, country, category){
+    client.get(headId+":url", function (err, reply){
+	if(err) throw err;
+	debugger;
+	if(reply){
+	  var trend = [ country+":"+category+":trending", 1, headId ];
+	  client.zincrby(trend, function (err, res){
+	    if(err) throw err;
+	  });
+	  var todayKey = parserUtil.getTodayKey(country, category);
+	  var todayUrls = [ todayKey+":url", 1, headId ];
+	  client.zincrby(todayUrls, function (err, res){
+              if(err) throw err;
+          });
+    	}
+    });
+}
 var port = process.env.PORT || 3000;
 app.listen(port);
 console.log('Listening on port', port);
