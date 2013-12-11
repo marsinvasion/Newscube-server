@@ -141,6 +141,7 @@ var getComments = function(id, comments){
 
 var idLength = 3;
 app.put('/:country/:category/registerDevice', function(req, res) {
+  debugger;
   var person = getPerson(req.headers)
   if(!person.googleId || !person.accountName){
     res.statusCode = 401;
@@ -169,12 +170,6 @@ app.put('/:country/:category/comment', function(req, res) {
 var addRegisteredId = function (id, person, country, category){
   client.hset(person.accountName, "registeredId", id, function (err, response){
     if(err) throw err;
-    if(response == 1){
-      client.lpush(country+":"+category+":registered_ids", function (err, res){
-        if(err) throw err;
-      });
-    };
-
   });
 };
 
