@@ -2,6 +2,7 @@ var redis = require("redis"),
         client = redis.createClient(),
 	clientSubscribe = redis.createClient();
 
+var api_key = "key=AIzaSyBGXRFxGhf2OjAu6FXkJIq5Y7n54xGkIls";
 client.on("error", function (err) {
         console.log("Redis Error " , err);
 });
@@ -21,8 +22,7 @@ clientSubscribe.on("message", function (channel, message) {
       url: 'https://android.googleapis.com/gcm/send',
       headers: {
 	'User-Agent': 'request',
-        'Content-Type':'application/json',
-        'Authorization':'key=AIzaSyDM55qw_yZUUNg9kTmU1fU5k-QQTZuR0c4'
+        'Authorization':api_key
       },
       json : {
         "data": {
@@ -33,7 +33,8 @@ clientSubscribe.on("message", function (channel, message) {
     };
     request.post(options, function(error, response, body){
 	if(error) throw error;
-  	console.log(response.statusCode, body);
+	if(response.statusCode != 200)
+  	  console.log(response.statusCode, body);
     });
   });
 
