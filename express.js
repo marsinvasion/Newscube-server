@@ -78,6 +78,36 @@ app.get('/:country/:category/trending/:start/:end', function(req, res) {
   getIds(args, res);
 });
 
+//- http://localhost:3000/commentId/23dd22
+app.get('/commentId/:id', function(req, res){
+  commentTree([], req.params.id, res);
+});
+
+var commentTree = function(comments, id, res){
+  client.hgetall(id+":comment", function (err, reply){
+    if(err) throw err;
+    if(reply){
+	var comment = createComment(id, "1", reply);
+	comment.comments = comments;
+	commentTree(comment, reply.headId, res);
+    }else{
+      client.get(id+":url", function(err, url){
+    	if(err) throw err;
+	client.hgetall(url, function(err, reply){
+	  if(err) throw err;
+	  if(reply){
+	    var news = createNews(reply, id, "1", url);
+	    news.comments = comments;
+	    res.json(news);
+	  } else {
+	    res.end();
+	  }
+	});
+      });	
+    }
+  });
+};
+
 var getIds = function(args, res){
 
   client.zrevrange(args, function(err, ids){
@@ -85,7 +115,6 @@ var getIds = function(args, res){
 	throw err;
     if(ids && ids.length>0){
       wait.launchFiber(idsToUrls, ids, res);
-      //idsToUrls(ids,res);
     }else{
 	res.statusCode = 404;
 	res.end();
@@ -96,7 +125,7 @@ var getIds = function(args, res){
 var idsToUrls = function(ids, res){
   var json = [];
   for(var i = 0; i < ids.length; i = i+2){
-	wait.for(getNewsFromId, ids[i], ids[i+1], json);
+    wait.for(getNewsFromId, ids[i], ids[i+1], json);
   }  
   res.json(json);
 };
@@ -105,6 +134,13 @@ var getNewsFromId = function(id, score, json){
     var url = wait.for(client.get.bind(client), id+":url");
     var reply = wait.for(client.hgetall.bind(client),url);
     if(reply){
+      var obj = createNews(reply, id, score, url);
+      wait.for(getComments, id, obj.comments);
+      json.push(obj);
+    }
+};
+
+var createNews = function (reply, id, score, url){
             var obj = {};
             obj.id = id;
             obj.score = score;
@@ -115,9 +151,7 @@ var getNewsFromId = function(id, score, json){
             obj.source = reply.source;
             obj.url = url;
 	    obj.comments = [];
-            wait.for(getComments, id, obj.comments);
-        json.push(obj);
-    }
+	return obj;
 };
 
 var getComments = function(id, comments){
@@ -127,8 +161,14 @@ var getComments = function(id, comments){
       var commentId = commentIds[i];
       var score = commentIds[i+1];
       var reply = wait.for(client.hgetall.bind(client), commentId+":comment");
-      var commentObj = {};
+      var commentObj = createComment(commentId, score, reply);
       comments.push(commentObj);
+      wait.for(getComments, commentId, commentObj.comments);
+    }
+};
+
+var createComment = function(commentId, score, reply){
+      var commentObj = {};
       commentObj.id = commentId;
       commentObj.score = score;
       commentObj.comment = reply.comment;
@@ -136,8 +176,7 @@ var getComments = function(id, comments){
       commentObj.displayName = reply.displayName;
       commentObj.inserted_at = reply.inserted_at;
       commentObj.comments = [];
-      wait.for(getComments, commentId, commentObj.comments);
-    }
+      return commentObj;
 };
 
 // PUT
