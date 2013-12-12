@@ -16,7 +16,7 @@ clientSubscribe.on("message", function (channel, message) {
   client.smembers(key, function (err, regIds){
     debugger;
     if(err) throw err;
-    client.hgetall(commentId, function (err, res){
+    client.hgetall(commentId+":comment", function (err, res){
       if(err) throw err;
       var comment = res.comment;
       var displayName = res.displayName;
@@ -29,6 +29,7 @@ clientSubscribe.on("message", function (channel, message) {
         json : {
           "data": {
 	    "display": displayName +" replies",
+	    "commentId": commentId,
 	    "comment": comment
           },
           "registration_ids": regIds	

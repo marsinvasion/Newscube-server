@@ -89,7 +89,7 @@ var commentTree = function(comments, id, res){
     if(reply){
 	var comment = createComment(id, "1", reply);
 	comment.comments = comments;
-	commentTree(comment, reply.headId, res);
+	commentTree([comment], reply.headId, res);
     }else{
       client.get(id+":url", function(err, url){
     	if(err) throw err;
@@ -98,7 +98,7 @@ var commentTree = function(comments, id, res){
 	  if(reply){
 	    var news = createNews(reply, id, "1", url);
 	    news.comments = comments;
-	    res.json(news);
+	    res.json([news]);
 	  } else {
 	    res.end();
 	  }
@@ -281,7 +281,7 @@ var addComment = function(idLength, accountName, comment, headId, firstName, dis
 	  }, function (err, response){
 		if(err)
 		  throw err;
-	  	clientPublish.publish("comment channel", "{\"key\":\""+accountName+":registeredIds\", \"commentId\":\""+commentId+"\"}");
+	  	clientPublish.publish("comment channel", "{\"key\":\""+accountName+":registeredIds\", \"commentId\":\""+randomId+"\"}");
 	  });
 	debugger;
 	    var args = [ headId, 1, randomId];
