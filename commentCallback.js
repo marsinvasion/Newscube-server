@@ -12,28 +12,33 @@ var request = require('request');
 clientSubscribe.on("message", function (channel, message) {
   var json = JSON.parse(message);
   var key = json.key;
-  var data = json.data;
-  debugger;
+  var commentId = json.commentId;
   client.smembers(key, function (err, regIds){
     debugger;
     if(err) throw err;
-    var options = {
-      url: 'https://android.googleapis.com/gcm/send',
-      headers: {
-	'User-Agent': 'request',
-        'Authorization':api_key
-      },
-      json : {
-        "data": {
-	  "comment":data
+    client.hgetall(commentId, function (err, res){
+      if(err) throw err;
+      var comment = res.comment;
+      var displayName = res.displayName;
+      var options = {
+        url: 'https://android.googleapis.com/gcm/send',
+        headers: {
+	  'User-Agent': 'request',
+          'Authorization':api_key
         },
-        "registration_ids": regIds	
-      }
-    };
-    request.post(options, function(error, response, body){
+        json : {
+          "data": {
+	    "display": displayName +" replies",
+	    "comment": comment
+          },
+          "registration_ids": regIds	
+        }
+      };
+      request.post(options, function(error, response, body){
 	if(error) throw error;
 	if(response.statusCode != 200)
   	  console.log(response.statusCode, body);
+      });
     });
   });
 

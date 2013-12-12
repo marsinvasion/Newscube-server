@@ -133,7 +133,6 @@ var getComments = function(id, comments){
       commentObj.score = score;
       commentObj.comment = reply.comment;
       commentObj.accountName = reply.accountName;
-      commentObj.firstName = reply.firstName;
       commentObj.displayName = reply.displayName;
       commentObj.inserted_at = reply.inserted_at;
       commentObj.comments = [];
@@ -228,17 +227,22 @@ var addComment = function(idLength, accountName, comment, headId, firstName, dis
 	if (res == 1){
 	  addComment(idLength + 1, accountName, comment, headId, firstName, displayName, country, category); //recursively increase id length till you find an unique id
 	}else{
+	  var name = accountName;
+	  if(firstName){
+	    name = firstName;
+	  }else if(displayName){
+	    name = displayName;
+	  }
 	  client.hmset(commentId, {
 	    "comment":comment,
 	    "headId":headId,
 	    "accountName":accountName,
-	    "displayName":displayName,
-	    "firstName":firstName,
+	    "displayName":name,
 	    "inserted_at":new Date()
 	  }, function (err, response){
 		if(err)
 		  throw err;
-	  	clientPublish.publish("comment channel", "{\"key\":\""+accountName+":registeredIds\", \"data\":\"You have a new reply\"}");
+	  	clientPublish.publish("comment channel", "{\"key\":\""+accountName+":registeredIds\", \"commentId\":\""+commentId+"\"}");
 	  });
 	debugger;
 	    var args = [ headId, 1, randomId];
