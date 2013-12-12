@@ -6,9 +6,13 @@ app.configure(function(){
   app.use(app.router);
 });
 var redis = require("redis"),
-        client = redis.createClient();
+        client = redis.createClient(),
+        clientPublish = redis.createClient();
 client.on("error", function (err) {
         console.log("Redis Error in server " , err);
+});
+clientPublish.on("error", function (err) {
+        console.log("Redis Error in publish server " , err);
 });
 var parserUtil = require('./parserUtil');
 var async = require('async');
@@ -213,6 +217,7 @@ var addComment = function(idLength, accountName, comment, headId, firstName, dis
 	}else{
 	  client.hmset(commentId, {
 	    "comment":comment,
+	    "headId":headId,
 	    "accountName":accountName,
 	    "displayName":displayName,
 	    "firstName":firstName,
@@ -220,6 +225,7 @@ var addComment = function(idLength, accountName, comment, headId, firstName, dis
 	  }, function (err, response){
 		if(err)
 		  throw err;
+	  	clientPublish.publish("comment channel", "{\"accountName\":\""+accountName+"\", \"field\":\"registeredId\"}");
 	  });
 	debugger;
 	    var args = [ headId, 1, randomId];
