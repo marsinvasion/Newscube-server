@@ -11,12 +11,11 @@ var request = require('request');
 
 clientSubscribe.on("message", function (channel, message) {
   var json = JSON.parse(message);
-  var key = json.accountName;
-  var field = json.field;
+  var key = json.key;
+  var data = json.data;
   debugger;
-  client.hget(key,field, function (err, regId){
+  client.smembers(key, function (err, regIds){
     debugger;
-    var regIds = [regId];
     if(err) throw err;
     var options = {
       url: 'https://android.googleapis.com/gcm/send',
@@ -26,7 +25,7 @@ clientSubscribe.on("message", function (channel, message) {
       },
       json : {
         "data": {
-	  "comment":"You have new replies"
+	  "comment":data
         },
         "registration_ids": regIds	
       }

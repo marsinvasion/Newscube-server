@@ -144,14 +144,27 @@ var getComments = function(id, comments){
 // PUT
 
 var idLength = 3;
-app.put('/:country/:category/registerDevice', function(req, res) {
-  debugger;
+app.put('/registerDevice', function(req, res) {
   var person = getPerson(req.headers)
   if(!person.googleId || !person.accountName){
     res.statusCode = 401;
   }else{
     var id = req.body.regid;
-    addRegisteredId(id, person, req.params.country, req.params.category);
+    addRegisteredId(id, person);
+  }
+  res.end();
+});
+
+app.put('/unregisterDevice', function(req, res) {
+  var person = getPerson(req.headers)
+  if(!person.googleId || !person.accountName){
+    res.statusCode = 401;
+  }else{
+    var id = req.body.regid;
+    client.srem(person.accountName+":registeredIds", id, function (err, res){
+	if(err) throw err;
+	debugger;
+    });
   }
   res.end();
 });
@@ -171,8 +184,8 @@ app.put('/:country/:category/comment', function(req, res) {
   res.end();
 });
 
-var addRegisteredId = function (id, person, country, category){
-  client.hset(person.accountName, "registeredId", id, function (err, response){
+var addRegisteredId = function (id, person){
+  client.sadd(person.accountName+":registeredIds", id, function (err, response){
     if(err) throw err;
   });
 };
@@ -225,7 +238,7 @@ var addComment = function(idLength, accountName, comment, headId, firstName, dis
 	  }, function (err, response){
 		if(err)
 		  throw err;
-	  	clientPublish.publish("comment channel", "{\"accountName\":\""+accountName+"\", \"field\":\"registeredId\"}");
+	  	clientPublish.publish("comment channel", "{\"key\":\""+accountName+":registeredIds\", \"data\":\"You have a new reply\"}");
 	  });
 	debugger;
 	    var args = [ headId, 1, randomId];
