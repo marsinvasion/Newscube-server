@@ -31,7 +31,7 @@ clientSubscribe.on("message", function (channel, message) {
         },
         json : {
           "data": {
-	    "display": displayName +" replies",
+	    "display": displayName +" replied",
 	    "commentId": commentId,
 	    "comment": comment
           },
