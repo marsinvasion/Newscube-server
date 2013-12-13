@@ -1,3 +1,24 @@
+var cluster = require('cluster');
+
+if (cluster.isMaster) {
+
+    // Count the machine's CPUs
+    var cpuCount = require('os').cpus().length;
+
+    // Create a worker for each CPU
+    for (var i = 0; i < cpuCount; i += 1) {
+        cluster.fork();
+    }
+    
+    // Listen for dying workers
+    cluster.on('exit', function (worker) {
+      console.log('Worker ' + worker.id + ' died :(');
+      cluster.fork();
+    });
+
+// Code to run if we're in a worker process
+} else {
+
 var express = require('express');
 var wait=require('wait.for');
 var app = express();
@@ -281,7 +302,7 @@ var addComment = function(idLength, accountName, comment, headId, firstName, dis
 	  }, function (err, response){
 		if(err)
 		  throw err;
-	  	clientPublish.publish("comment channel", "{\"key\":\""+accountName+":registeredIds\", \"commentId\":\""+randomId+"\"}");
+	  	clientPublish.publish("comment channel", "{\"headId\":\""+headId+"\", \"commentId\":\""+randomId+"\"}");
 	  });
 	debugger;
 	    var args = [ headId, 1, randomId];
@@ -314,4 +335,5 @@ var incrUrl = function (headId, country, category){
 }
 var port = process.env.PORT || 3000;
 app.listen(port);
-console.log('Listening on port', port);
+console.log("worker", cluster.worker.id, 'Listening on port', port);
+}

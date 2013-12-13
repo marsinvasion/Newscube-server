@@ -11,9 +11,12 @@ var request = require('request');
 
 clientSubscribe.on("message", function (channel, message) {
   var json = JSON.parse(message);
-  var key = json.key;
+  var headId = json.headId;
   var commentId = json.commentId;
-  client.smembers(key, function (err, regIds){
+  client.hget(headId+":comment", "accountName", function (err, accountName){
+  if(err) throw err;
+  if(accountName){
+  client.smembers(accountName+":registeredIds", function (err, regIds){
     debugger;
     if(err) throw err;
     client.hgetall(commentId+":comment", function (err, res){
@@ -35,6 +38,7 @@ clientSubscribe.on("message", function (channel, message) {
           "registration_ids": regIds	
         }
       };
+      console.log("sending comment", options.json);
       request.post(options, function(error, response, body){
 	if(error) throw error;
 	if(response.statusCode != 200)
@@ -42,7 +46,10 @@ clientSubscribe.on("message", function (channel, message) {
       });
     });
   });
+  }
+  });
 
 });
 
 clientSubscribe.subscribe("comment channel");
+console.log("starting comment channel worker");
