@@ -38,7 +38,6 @@ clientSubscribe.on("message", function (channel, message) {
           "registration_ids": regIds	
         }
       };
-      console.log("sending comment", options.json);
       request.post(options, function(error, response, body){
 	if(error) throw error;
 	if(response.statusCode != 200)
