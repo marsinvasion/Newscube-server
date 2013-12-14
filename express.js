@@ -23,6 +23,7 @@ var express = require('express');
 var wait=require('wait.for');
 var app = express();
 app.configure(function(){
+  app.use(express.compress());
   app.use(express.bodyParser());
   app.use(app.router);
 });
