@@ -14,8 +14,8 @@ var parseFeed = function(clientDB, out, config, dictionaryKey, handle){
         (function (j) {
 	   try{
 		var item = out.items[j];
-	     	if(item.title){
-//		  client.sadd("country:date", todayKey); // sadd country:category:date US:news:05/01/2013
+              	var summary = getSummary(item);
+	     	if(item.title && summary){
              	  client.hexists(item.url, "title", function (error, reply){
 		    if(error)
 		      throw error;
