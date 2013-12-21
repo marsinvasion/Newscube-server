@@ -2,7 +2,7 @@ var redis = require("redis"),
         client = redis.createClient(),
 	clientSubscribe = redis.createClient();
 
-var api_key = "key=AIzaSyBGXRFxGhf2OjAu6FXkJIq5Y7n54xGkIls";
+var api_key = "key=AIzaSyA4UvNtqQJUm39S-ELIJYPN0fj-CU4BY0Y";
 client.on("error", function (err) {
         console.log("Redis Error " , err);
 });
