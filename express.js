@@ -22,11 +22,6 @@ if (cluster.isMaster) {
 var express = require('express');
 var wait=require('wait.for');
 var app = express();
-app.configure(function(){
-  app.use(express.compress());
-  app.use(express.bodyParser());
-  app.use(app.router);
-});
 var redis = require("redis"),
         client = redis.createClient(),
         clientPublish = redis.createClient();
@@ -38,6 +33,28 @@ clientPublish.on("error", function (err) {
 });
 var parserUtil = require('./parserUtil');
 var async = require('async');
+app.configure(function(){
+
+  app.use(function(req, res, next){
+    var ua = req.headers['user-agent'];
+    client.zadd('online', Date.now(), ua, next);
+  });
+
+  app.use(function(req, res, next){
+    var min = 60 * 1000;
+    var ago = Date.now() - min;
+    client.zrevrangebyscore('online', '+inf', ago, function(err, users){
+      if (err) return next(err);
+      req.online = users;
+      next();
+    });
+  });
+  
+  app.use(express.compress());
+  app.use(express.bodyParser());
+  app.use(app.router);
+});
+
 var minTagCount = 30;
 
 // GET
@@ -47,6 +64,11 @@ app.get('/status', function(req, res) {
   client.ping(function(err, reply){
 	res.json(reply);
   });
+});
+
+
+app.get('/online', function(req, res){
+  res.send(req.online.length + ' users online');
 });
 
 //- http://localhost:3000/US/news/tag/0/99
@@ -205,14 +227,14 @@ var createComment = function(commentId, score, reply){
 
 var idLength = 3;
 app.put('/registerDevice', function(req, res) {
-  var person = getPerson(req.headers)
-  if(!person.googleId || !person.accountName){
+var person = getPerson(req.headers)
+if(!person.googleId || !person.accountName){
     res.statusCode = 401;
-  }else{
+}else{
     var id = req.body.regid;
     addRegisteredId(id, person);
-  }
-  res.end();
+}  
+res.end();
 });
 
 app.put('/unregisterDevice', function(req, res) {
