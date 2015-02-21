@@ -44,7 +44,7 @@ var saveNews = function(idLength, config, item, todayKey, dictionaryKey, handle)
 	}else{
  	  saveNewsArticle(item, randomId, config, handle);
 	  client.set(randomId+":url", item.url);
-	  var args = [ urlKey, 1, randomId];
+	  var args = [ urlKey, Date.now(), randomId];
 	  client.zadd(args, function (error, reply){ // sadd US:news:05/01/2013:url fd32423
 	    debugger;
 	    if(error)
@@ -139,13 +139,7 @@ var saveAndIncrementTagCount = function(todayKey, matchWord, client, randomId){
 };
 
 var getTodayKey = function(country, category){
-             var today = new Date();
-             var dd = today.getDate();
-             var mm = today.getMonth()+1; //January is 0!
-             var yyyy = today.getFullYear();
-             if(dd<10){dd='0'+dd} if(mm<10){mm='0'+mm} today = mm+'/'+dd+'/'+yyyy;
-             return country+":"+category+":"+today;
-    //         return country+":"+category+":"+"06/26/2013";
+             return country+":"+category;
 };
 
 var getTagKey = function(todayKey){
