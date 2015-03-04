@@ -42,9 +42,9 @@ var saveNews = function(idLength, config, item, todayKey, dictionaryKey, handle)
 	if(response){ //id exists
 	  saveNews(idLength + 1, config, item, todayKey, dictionaryKey, handle);
 	}else{
- 	  saveNewsArticle(item, randomId, config, handle);
+ 	  var publishedAt = saveNewsArticle(item, randomId, config, handle);
 	  client.set(randomId+":url", item.url);
-	  var args = [ urlKey, Date.now(), randomId];
+	  var args = [ urlKey, publishedAt.getTime(), randomId];
 	  client.zadd(args, function (error, reply){ // sadd US:news:05/01/2013:url fd32423
 	    debugger;
 	    if(error)
@@ -86,6 +86,7 @@ var saveNewsArticle = function(item, randomId, config, handle){
                 "source":handle,
 		"id":randomId
         } );
+  return published;
 };
 
 var getSummary = function(item){
