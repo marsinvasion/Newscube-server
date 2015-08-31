@@ -1,1 +1,1 @@
-This is a sample news aggregator
+News Aggregator for Newscube android application https://github.com/marsinvasion/Newscube
